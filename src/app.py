@@ -262,6 +262,7 @@ with open("config/plot_sections.json", "r") as file:
 # Initialize the app - incorporate a Dash Mantine theme
 external_stylesheets = [dmc.theme.DEFAULT_COLORS]
 app = Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server
 
 initial_df = pd.DataFrame(
     {
@@ -524,4 +525,4 @@ def func(n_clicks):
 # Run the App
 if __name__ == "__main__":
     app.run_server(debug=False)
-    #app.run(debug=True)
+    # app.run(debug=True)
