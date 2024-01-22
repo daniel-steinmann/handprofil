@@ -11,6 +11,7 @@ import datetime as dt
 import io
 import json
 import numpy as np
+import os
 from flask import send_file
 
 
@@ -522,4 +523,5 @@ def func(n_clicks):
 
 # Run the App
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run_server(debug=False)
+    #app.run(debug=True)
