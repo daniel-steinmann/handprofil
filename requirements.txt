@@ -1,0 +1,10 @@
+dash>=2.14.0
+numpy>=1.16.2
+pandas>=2.1.0
+plotly
+dash_mantine_components
+openpyexcel
+openpyxl
+pytest
+pyarrow
+gunicorn
