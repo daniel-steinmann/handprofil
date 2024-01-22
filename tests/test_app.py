@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from app import summation, return_wagner_decile, validate_upload
+from src.app import summation, return_wagner_decile, validate_upload
 
 
 def test_summation():
@@ -40,7 +40,12 @@ def test_validate_upload(filename, expected):
     """
     Testing Upload Function
     """
+    # Arrange
+    attributes = pd.read_csv("../lib/tables/attributes.csv", header=0, index_col=False)
+    meta_attributes = pd.read_csv(
+        "../lib/tables/meta_attributes.csv", header=0, index_col=False
+    )
 
     df = pd.read_excel(f"test_data/{filename}")
 
-    assert validate_upload(df) == expected
+    assert validate_upload(df, attributes, meta_attributes) == expected
