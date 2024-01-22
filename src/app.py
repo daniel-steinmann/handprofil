@@ -203,13 +203,20 @@ def parse_contents(contents, filename, date):
     return df
 
 
+def get_absolute_path(relative_path):
+    directory_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(directory_path, relative_path)
+
+
 def validate_upload(df) -> dmc.Alert:
     # Necessary Assertions
     # 1. Correct Input Format (All required indices must be present in id - column)
     # 2. At least one value field must have a value
-    attributes = pd.read_csv("tables/attributes.csv", header=0, index_col=False)
+    attributes = pd.read_csv(
+        get_absolute_path("tables/attributes.csv"), header=0, index_col=False
+    )
     meta_attributes = pd.read_csv(
-        "tables/meta_attributes.csv", header=0, index_col=False
+        get_absolute_path("tables/meta_attributes.csv"), header=0, index_col=False
     )
 
     validation_set = set(
@@ -225,25 +232,29 @@ def validate_upload(df) -> dmc.Alert:
     if missing and unknown:
         msg = f"Missing IDs: {missing}, Unknown IDs: {unknown}"
         alert.children = msg
-        return alert
+        return False, alert
 
     if missing:
         msg = f"Missing IDs: {missing}"
         alert.children = msg
-        return alert
+        return False, alert
 
     if unknown:
         msg = f"Unknown IDs: {unknown}"
         alert.children = msg
-        return alert
+        return False, alert
 
     if df.value.isna().all():
         msg = f"No values found"
         alert.children = msg
-        return alert
+        return False, alert
 
-    return None
+    return True, None
 
+
+# Path
+print(os.getenv("DEBUG", "NONE"))
+print(os.getcwd())
 
 # Debug mode without manual uploads
 DEBUG_MODE = False
@@ -251,12 +262,16 @@ if DEBUG_MODE:
     debug_df = pd.read_excel("excel_prototypes/measurement.xlsx")
 
 # Get data
-attributes = pd.read_csv("tables/attributes.csv", header=0, index_col=False)
+attributes = pd.read_csv(
+    get_absolute_path("tables/attributes.csv"), header=0, index_col=False
+)
 attributes = attributes.set_index("id", drop=True)
-meta_attributes = pd.read_csv("tables/meta_attributes.csv", header=0, index_col=False)
+meta_attributes = pd.read_csv(
+    get_absolute_path("tables/meta_attributes.csv"), header=0, index_col=False
+)
 meta_attributes = meta_attributes.set_index("id", drop=True)
-background = pd.read_csv("tables/background.csv", index_col=0)
-with open("config/plot_sections.json", "r") as file:
+background = pd.read_csv(get_absolute_path("tables/background.csv"), index_col=0)
+with open(get_absolute_path("config/plot_sections.json"), "r") as file:
     sections = json.load(file)
 
 # Initialize the app - incorporate a Dash Mantine theme
@@ -416,8 +431,9 @@ def display_graph(
 
     # Get Uploaded Data (Only First Item) or load sample data
     input_df = children[0]
-    if validate_upload(input_df) is not None:
-        upload_alerts.append(validate_upload(input_df))
+    _, validation_result = validate_upload(input_df)
+    if validation_result is not None:
+        upload_alerts.append(validation_result)
         return [], [], upload_alerts
 
     input_df = input_df.set_index("id", drop=True)
@@ -510,7 +526,7 @@ def display_graph(
 
 @app.server.route("/download/")
 def download_excel():
-    return send_file("download/measurement_template.xlsx")
+    return send_file(get_absolute_path("download/measurement_template.xlsx"))
 
 
 @callback(
@@ -519,7 +535,7 @@ def download_excel():
     prevent_initial_call=True,
 )
 def func(n_clicks):
-    return dcc.send_file("download/measurement_template.xlsx")
+    return dcc.send_file(get_absolute_path("download/measurement_template.xlsx"))
 
 
 # Run the App

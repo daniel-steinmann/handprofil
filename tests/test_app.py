@@ -1,6 +1,12 @@
 import pytest
 import pandas as pd
+import os
 from src.app import summation, return_wagner_decile, validate_upload
+
+
+def get_absolute_path(relative_path):
+    directory_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(directory_path, relative_path)
 
 
 def test_summation():
@@ -41,11 +47,7 @@ def test_validate_upload(filename, expected):
     Testing Upload Function
     """
     # Arrange
-    attributes = pd.read_csv("../lib/tables/attributes.csv", header=0, index_col=False)
-    meta_attributes = pd.read_csv(
-        "../lib/tables/meta_attributes.csv", header=0, index_col=False
-    )
+    df = pd.read_excel(get_absolute_path(f"data/{filename}"))
 
-    df = pd.read_excel(f"test_data/{filename}")
-
-    assert validate_upload(df, attributes, meta_attributes) == expected
+    result, _ = validate_upload(df)
+    assert result == expected
