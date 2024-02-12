@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import os
-from src.app import summation, return_wagner_decile, upload_is_valid
+from src.handprofil.app import summation, return_wagner_decile, upload_is_valid
 
 
 def get_absolute_path(relative_path):
