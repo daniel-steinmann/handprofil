@@ -195,7 +195,9 @@ def parse_contents(contents, filename, date):
             )
         elif "xls" in filename:
             # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
+            df = pd.read_excel(
+                io.BytesIO(decoded),
+            )
     except Exception as e:
         print(e)
         return html.Div(["There was an error processing this file."])
@@ -208,7 +210,7 @@ def get_absolute_path(relative_path):
     return os.path.join(directory_path, relative_path)
 
 
-def validate_upload(df) -> dmc.Alert:
+def upload_is_valid(df) -> dmc.Alert:
     # Necessary Assertions
     # 1. Correct Input Format (All required indices must be present in id - column)
     # 2. At least one value field must have a value
@@ -222,6 +224,7 @@ def validate_upload(df) -> dmc.Alert:
     validation_set = set(
         np.concatenate([attributes.id.values, meta_attributes.id.values])
     )
+
     upload_set = set(df.id.values)
 
     missing = validation_set.difference(upload_set)
@@ -431,14 +434,12 @@ def display_graph(
 
     # Get Uploaded Data (Only First Item) or load sample data
     input_df = children[0]
-    _, validation_result = validate_upload(input_df)
-    if validation_result is not None:
-        upload_alerts.append(validation_result)
+    result, alert = upload_is_valid(input_df)
+    if result is False:
+        upload_alerts.append(alert)
         return [], [], upload_alerts
 
     input_df = input_df.set_index("id", drop=True)
-
-    # Validate Upload
 
     # Get Metadata
     metadata = pd.merge(

@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import os
-from src.app import summation, return_wagner_decile, validate_upload
+from src.app import summation, return_wagner_decile, upload_is_valid
 
 
 def get_absolute_path(relative_path):
@@ -49,5 +49,5 @@ def test_validate_upload(filename, expected):
     # Arrange
     df = pd.read_excel(get_absolute_path(f"data/{filename}"))
 
-    result, _ = validate_upload(df)
+    result, _ = upload_is_valid(df)
     assert result == expected
