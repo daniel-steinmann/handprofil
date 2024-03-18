@@ -77,10 +77,8 @@ def display_graph(
     if not result:
         return [], [], alert
 
-    # Display Information about the subject
     subject_grid = plotting.return_subject_grid(metadata_df, "switch-subject")
 
-    # Display plots
     bin_values = calculations.get_calculated_values(
         data_df["value"], instrument, sex, hand
     )

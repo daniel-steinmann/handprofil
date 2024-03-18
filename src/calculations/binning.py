@@ -63,12 +63,13 @@ def get_calculated_values(
 
     bin_edges = get_bin_edges(instrument, sex, hand)
 
-    output = pd.DataFrame(dtype=int)
+    output = pd.DataFrame()
     for index, measurement in input.items():
         if index in bin_edges.index:
             bin = return_wagner_decile(bin_edges.loc[index], measurement)
             output.loc[index, "bin"] = bin
 
-    output["bin"] = output["bin"].astype(int)
+    if not output.empty:
+        output["bin"] = output["bin"].astype(int)
 
     return output
