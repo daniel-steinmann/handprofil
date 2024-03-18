@@ -337,13 +337,7 @@ def display_graph(
         upload_alerts.append(alert)
         return [], [], upload_alerts
 
-    metadata_df, data_df = split_metadata_data(input_df)
-    input_df = input_df.set_index("id", drop=True)
-
-    # Get Metadata
-    metadata = pd.merge(
-        meta_attributes, input_df["value"], "inner", left_on="id", right_on="id"
-    )
+    metadata, data_df = split_metadata_data(input_df)
 
     subject_grid = [
         dmc.Col(
@@ -368,21 +362,6 @@ def display_graph(
         ),
         dmc.Switch(id="switch-subject"),
     ]
-
-    # Get background
-    background_filtered = background.query(
-        "instrument == @instrument & sex == @sex & hand == @hand"
-    )
-
-    # Merge measurements and background
-    merged_values = pd.merge(
-        background_filtered, input_df["value"], "inner", left_on="id", right_on="id"
-    )
-
-    # Apply binning
-    merged_values["bin"] = merged_values.apply(
-        lambda row: return_wagner_decile(row.iloc[3:12], row.iloc[12]), axis=1
-    )
 
     bin_values = get_calculated_values(data_df["value"], instrument, sex, hand)
     bin_values.name = "bin"
