@@ -9,7 +9,12 @@ import os
 from flask import send_file
 
 from calculations import get_calculated_values
-from excelparser import parse_contents, validate_upload, split_metadata_data
+from excelparser import (
+    parse_contents,
+    validate_upload,
+    split_metadata_data,
+    parse_and_validate_uploads,
+)
 from plotting import (
     return_section_figure,
     get_layout,
@@ -35,11 +40,6 @@ def load_plot_section_config():
 # Path
 print(os.getenv("DEBUG", "NONE"))
 print(os.getcwd())
-
-# Debug mode without manual uploads
-DEBUG_MODE = False
-if DEBUG_MODE:
-    debug_df = pd.read_excel("excel_prototypes/measurement.xlsx")
 
 # Get data
 attributes = load_attributes()
@@ -79,33 +79,20 @@ app.layout = get_layout()
     Input("select-instrument", "value"),
 )
 def display_graph(
-    list_of_contents, list_of_names, list_of_dates, hand, sex, instrument
+    upload_contents, upload_filenames, upload_dates, hand, sex, instrument
 ):
     # Inputs
-    all_plots_children = []
-    subject_grid = []
-    upload_alerts = []
-    if list_of_contents is None:
+    if upload_contents is None:
         return no_update, no_update, no_update
 
-    if DEBUG_MODE:
-        children = [debug_df]
-    else:
-        children = [
-            parse_contents(c, n, d)
-            for c, n, d in zip(list_of_contents, list_of_names, list_of_dates)
-        ]
+    result, metadata_df, data_df, alert = parse_and_validate_uploads(
+        upload_contents, upload_filenames, upload_dates
+    )
 
-    # Get Uploaded Data (Only First Item) or load sample data
-    input_df = children[0]
-    result, alert = validate_upload(input_df)
-    if result is False:
-        upload_alerts.append(alert)
-        return [], [], upload_alerts
+    if not result:
+        return [], [], alert
 
-    metadata, data_df = split_metadata_data(input_df)
-
-    subject_grid = return_subject_grid(metadata, "switch-subject")
+    subject_grid = return_subject_grid(metadata_df, "switch-subject")
 
     bin_values = get_calculated_values(data_df["value"], instrument, sex, hand)
     bin_values.name = "bin"
@@ -132,7 +119,7 @@ def display_graph(
             all_plots_children.append(child)
 
     # Outputs
-    return all_plots_children, subject_grid, upload_alerts
+    return all_plots_children, subject_grid, []
 
 
 @app.server.route("/download/")

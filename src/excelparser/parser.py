@@ -127,3 +127,21 @@ def split_metadata_data(df):
     df = df.set_index("id", drop=True)
 
     return df.loc[meta_attributes.index], df.loc[attributes.index]
+
+
+def parse_and_validate_uploads(
+    upload_contents: list, upload_filenames: list, upload_dates: list
+):
+    uploaded_files = [
+        parse_contents(c, n, d)
+        for c, n, d in zip(upload_contents, upload_filenames, upload_dates)
+    ]
+
+    input_df = uploaded_files[0]
+
+    validation_result, alert = validate_upload(input_df)
+    if not validation_result:
+        return False, None, None, alert
+
+    metadata, data_df = split_metadata_data(input_df)
+    return True, metadata, data_df, None
