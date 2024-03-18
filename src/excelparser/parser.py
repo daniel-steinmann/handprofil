@@ -8,6 +8,7 @@ import numpy as np
 
 import common
 
+
 def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(",")
 
@@ -125,7 +126,7 @@ def split_metadata_data(df):
 
     df = df.set_index("id", drop=True)
 
-    return df.loc[meta_attributes.index], df.loc[attributes.index]
+    return df.loc[meta_attributes.index, "value"], df.loc[attributes.index, "value"]
 
 
 def parse_and_validate_uploads(

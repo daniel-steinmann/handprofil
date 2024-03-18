@@ -70,19 +70,15 @@ def display_graph(
     if upload_contents is None:
         return no_update, no_update, no_update
 
-    result, metadata_df, data_df, alert = excelparser.parse_and_validate_uploads(
+    result, metadata, data, alert = excelparser.parse_and_validate_uploads(
         upload_contents, upload_filenames, upload_dates
     )
 
     if not result:
         return [], [], alert
 
-    subject_grid = plotting.return_subject_grid(metadata_df, "switch-subject")
-
-    bin_values = calculations.get_calculated_values(
-        data_df["value"], instrument, sex, hand
-    )
-
+    subject_grid = plotting.return_subject_grid(metadata, "switch-subject")
+    bin_values = calculations.get_calculated_values(data, instrument, sex, hand)
     decile_plot_df = plotting.return_decile_plot_df(bin_values)
 
     # Order by sections

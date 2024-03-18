@@ -147,25 +147,23 @@ def wrap_figure_in_graph(title: str, figure):
     )
 
 
-def return_subject_grid(metadata: pd.DataFrame, switch_id: str):
+def return_subject_grid(metadata: pd.Series, switch_id: str):
     return [
         dmc.Col(
             [
-                dmc.Text(f"ID: {metadata.loc['M1','value']}"),
-                dmc.Text(f"Datum: {metadata.loc['M2','value'].strftime('%d.%m.%Y')}"),
-                dmc.Text(f"Name: {metadata.loc['M3','value']}"),
-                dmc.Text(f"Vorname: {metadata.loc['M4','value']}"),
+                dmc.Text(f"ID: {metadata.loc['M1']}"),
+                dmc.Text(f"Datum: {metadata.loc['M2'].strftime('%d.%m.%Y')}"),
+                dmc.Text(f"Name: {metadata.loc['M3']}"),
+                dmc.Text(f"Vorname: {metadata.loc['M4']}"),
             ],
             span="auto",
         ),
         dmc.Col(
             [
-                dmc.Text(
-                    f"Geburtsdatum: {metadata.loc['M5','value'].strftime('%d.%m.%Y')}"
-                ),
-                dmc.Text(f"Geschlecht: {metadata.loc['M6','value']}"),
-                dmc.Text(f"Händigkeit: {metadata.loc['M7','value']}"),
-                dmc.Text(f"Instrument: {metadata.loc['M8','value']}"),
+                dmc.Text(f"Geburtsdatum: {metadata.loc['M5'].strftime('%d.%m.%Y')}"),
+                dmc.Text(f"Geschlecht: {metadata.loc['M6']}"),
+                dmc.Text(f"Händigkeit: {metadata.loc['M7']}"),
+                dmc.Text(f"Instrument: {metadata.loc['M8']}"),
             ],
             span="auto",
         ),
