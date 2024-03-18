@@ -85,13 +85,7 @@ def display_graph(
         data_df["value"], instrument, sex, hand
     )
 
-    decile_plot_df = pd.merge(
-        attributes,
-        bin_values,
-        "inner",
-        left_on="id",
-        right_index=True,
-    )
+    decile_plot_df = plotting.return_decile_plot_df(bin_values)
 
     # Order by sections
     all_plots_children = []
