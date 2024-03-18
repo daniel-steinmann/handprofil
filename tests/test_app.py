@@ -1,8 +1,5 @@
 import pytest
-from handprofil import (
-    summation,
-    return_wagner_decile,
-)
+from handprofil import summation, return_wagner_decile, load_plot_section_config
 
 
 def test_summation():
@@ -27,3 +24,10 @@ def test_return_wagner_decile(value, expected):
 
     result = return_wagner_decile(bin_edges, value)
     assert result == expected
+
+
+def test_load_plot_section_config():
+
+    section = load_plot_section_config()
+
+    assert isinstance(section, list)

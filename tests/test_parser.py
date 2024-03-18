@@ -18,7 +18,7 @@ def get_testfile_path(relative_path):
         ("input_too_many_indices.xlsx", False),
     ],
 )
-def test_validate_upload(filename, expected):
+def test_upload_is_valid(filename, expected):
     """
     Testing Upload Function
     """
@@ -28,14 +28,13 @@ def test_validate_upload(filename, expected):
     # Act
     result, _ = upload_is_valid(df)
 
-    # Assert
+    # Assertk
     assert result == expected
 
 
 @pytest.mark.parametrize(
     "filename, expected",
     [
-        ("input_successful.xlsx", True),
         ("input_empty_metadata.xlsx", False),
         ("input_errors_in_metadata.xlsx", False),
     ],

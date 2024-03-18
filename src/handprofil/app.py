@@ -1,21 +1,28 @@
 # Import packages
-from dash import Dash, html, dash_table, dcc, callback, Output, Input, State, no_update
-from dash.exceptions import PreventUpdate
+from dash import Dash, html, dcc, callback, Output, Input, State, no_update
 import pandas as pd
 import plotly.express as px
 import dash_mantine_components as dmc
 import plotly.graph_objects as go
-import base64
-import re
-import datetime as dt
-import io
 import json
-import numpy as np
 import os
 from flask import send_file
 
 from excelparser import parse_contents, upload_is_valid
-from common import get_absolute_path
+from common import (
+    get_absolute_path,
+    load_meta_attributes,
+    load_attributes,
+    load_background,
+)
+
+
+def load_plot_section_config():
+    with open(
+        get_absolute_path("src/handprofil/config/plot_sections.json"), "r"
+    ) as file:
+        sections = json.load(file)
+    return sections
 
 
 def return_wagner_decile(bin_edges: list, value: float) -> int:
@@ -196,21 +203,10 @@ if DEBUG_MODE:
     debug_df = pd.read_excel("excel_prototypes/measurement.xlsx")
 
 # Get data
-attributes = pd.read_csv(
-    get_absolute_path("src/common/tables/attributes.csv"), header=0, index_col=False
-)
-attributes = attributes.set_index("id", drop=True)
-meta_attributes = pd.read_csv(
-    get_absolute_path("src/common/tables/meta_attributes.csv"),
-    header=0,
-    index_col=False,
-)
-meta_attributes = meta_attributes.set_index("id", drop=True)
-background = pd.read_csv(
-    get_absolute_path("src/common/tables/background.csv"), index_col=0
-)
-with open(get_absolute_path("src/handprofil/config/plot_sections.json"), "r") as file:
-    sections = json.load(file)
+attributes = load_attributes()
+meta_attributes = load_meta_attributes()
+background = load_background()
+sections = load_plot_section_config()
 
 # Initialize the app - incorporate a Dash Mantine theme
 external_stylesheets = [dmc.theme.DEFAULT_COLORS]

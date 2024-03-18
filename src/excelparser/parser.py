@@ -1,5 +1,3 @@
-import inspect
-import os
 from dash import html
 import pandas as pd
 import dash_mantine_components as dmc
@@ -8,7 +6,7 @@ import re
 import io
 import numpy as np
 
-from common import get_absolute_path
+from common import load_attributes, load_meta_attributes
 
 
 def parse_contents(contents, filename, date):
@@ -37,17 +35,11 @@ def upload_is_valid(df) -> dmc.Alert:
     # Necessary Assertions
     # 1. Correct Input Format (All required indices must be present in id - column)
     # 2. At least one value field must have a value
-    attributes = pd.read_csv(
-        get_absolute_path("src/common/tables/attributes.csv"), header=0, index_col=False
-    )
-    meta_attributes = pd.read_csv(
-        get_absolute_path("src/common/tables/meta_attributes.csv"),
-        header=0,
-        index_col=False,
-    )
+    attributes = load_attributes()
+    meta_attributes = load_meta_attributes()
 
     validation_set = set(
-        np.concatenate([attributes.id.values, meta_attributes.id.values])
+        np.concatenate([attributes.index.values, meta_attributes.index.values])
     )
 
     upload_set = set(df.id.values)
@@ -86,18 +78,14 @@ def validate_meta_attributes(df) -> dmc.Alert:
     # 2. Metadata attributes make sense
     # TODO: Metadata should not be configurable, part of application
 
-    meta_attributes = pd.read_csv(
-        get_absolute_path("src/common/tables/meta_attributes.csv"),
-        header=0,
-        index_col=False,
-    )
+    meta_attributes = load_meta_attributes()
 
     df = df.set_index("id", drop=True)
 
     alert = dmc.Alert(title="Validation error", color="red")
     missing_values = []
 
-    for field in meta_attributes["id"].values:
+    for field in meta_attributes.index.values:
         if df.isna().loc[field, "value"]:
             missing_values.append(field)
 
