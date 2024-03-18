@@ -8,30 +8,15 @@ import json
 import os
 from flask import send_file
 
-from calculations import get_calculated_values
-from excelparser import (
-    parse_contents,
-    validate_upload,
-    split_metadata_data,
-    parse_and_validate_uploads,
-)
-from plotting import (
-    return_section_figure,
-    get_layout,
-    return_subject_grid,
-    wrap_figure_in_graph,
-)
-from common import (
-    get_absolute_path,
-    load_meta_attributes,
-    load_attributes,
-    load_background,
-)
+import calculations
+import excelparser
+import plotting
+import common
 
 
 def load_plot_section_config():
     with open(
-        get_absolute_path("src/handprofil/config/plot_sections.json"), "r"
+        common.get_absolute_path("src/handprofil/config/plot_sections.json"), "r"
     ) as file:
         sections = json.load(file)
     return sections
@@ -42,8 +27,8 @@ print(os.getenv("DEBUG", "NONE"))
 print(os.getcwd())
 
 # Get data
-attributes = load_attributes()
-background = load_background()
+attributes = common.load_attributes()
+background = common.load_background()
 sections = load_plot_section_config()
 
 # Initialize the app - incorporate a Dash Mantine theme
@@ -64,7 +49,7 @@ initial_df = pd.DataFrame(
 )
 
 # App layout
-app.layout = get_layout()
+app.layout = plotting.get_layout()
 
 
 @callback(
@@ -85,7 +70,7 @@ def display_graph(
     if upload_contents is None:
         return no_update, no_update, no_update
 
-    result, metadata_df, data_df, alert = parse_and_validate_uploads(
+    result, metadata_df, data_df, alert = excelparser.parse_and_validate_uploads(
         upload_contents, upload_filenames, upload_dates
     )
 
@@ -93,10 +78,12 @@ def display_graph(
         return [], [], alert
 
     # Display Information about the subject
-    subject_grid = return_subject_grid(metadata_df, "switch-subject")
+    subject_grid = plotting.return_subject_grid(metadata_df, "switch-subject")
 
     # Display plots
-    bin_values = get_calculated_values(data_df["value"], instrument, sex, hand)
+    bin_values = calculations.get_calculated_values(
+        data_df["value"], instrument, sex, hand
+    )
 
     decile_plot_df = pd.merge(
         attributes,
@@ -115,8 +102,8 @@ def display_graph(
 
         if len(valid_indices) > 0:
             df = df.loc[valid_indices, :].reset_index()
-            figure = return_section_figure(df)
-            child = wrap_figure_in_graph(section["title"], figure)
+            figure = plotting.return_section_figure(df)
+            child = plotting.wrap_figure_in_graph(section["title"], figure)
             all_plots_children.append(child)
 
     # Outputs
@@ -125,7 +112,7 @@ def display_graph(
 
 @app.server.route("/download/")
 def download_excel():
-    return send_file(get_absolute_path("download/measurement_template.xlsx"))
+    return send_file(common.get_absolute_path("download/measurement_template.xlsx"))
 
 
 @callback(
@@ -134,7 +121,7 @@ def download_excel():
     prevent_initial_call=True,
 )
 def func(n_clicks):
-    return dcc.send_file(get_absolute_path("download/measurement_template.xlsx"))
+    return dcc.send_file(common.get_absolute_path("download/measurement_template.xlsx"))
 
 
 # Run the App

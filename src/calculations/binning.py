@@ -1,5 +1,5 @@
 import pandas as pd
-from common import load_background
+import common
 
 
 def return_wagner_decile(bin_edges: list, value: float) -> int:
@@ -31,7 +31,7 @@ def return_wagner_decile(bin_edges: list, value: float) -> int:
 
 def get_bin_edges(instrument: str, sex: str, hand: str) -> pd.DataFrame:
 
-    background = load_background()
+    background = common.load_background()
     assert instrument in background["instrument"].unique()
     assert hand in background["hand"].unique()
     assert sex in background["sex"].unique()

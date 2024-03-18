@@ -6,8 +6,7 @@ import re
 import io
 import numpy as np
 
-from common import load_attributes, load_meta_attributes
-
+import common
 
 def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(",")
@@ -35,8 +34,8 @@ def validate_upload_format(df) -> dmc.Alert:
     # Necessary Assertions
     # 1. Correct Input Format (All required indices must be present in id - column)
     # 2. At least one value field must have a value
-    attributes = load_attributes()
-    meta_attributes = load_meta_attributes()
+    attributes = common.load_attributes()
+    meta_attributes = common.load_meta_attributes()
 
     validation_set = set(
         np.concatenate([attributes.index.values, meta_attributes.index.values])
@@ -78,7 +77,7 @@ def validate_meta_attributes(df) -> dmc.Alert:
     # 2. Metadata attributes make sense
     # TODO: Metadata should not be configurable, part of application
 
-    meta_attributes = load_meta_attributes()
+    meta_attributes = common.load_meta_attributes()
 
     df = df.set_index("id", drop=True)
 
@@ -121,8 +120,8 @@ def validate_upload(df) -> dmc.Alert:
 
 
 def split_metadata_data(df):
-    attributes = load_attributes()
-    meta_attributes = load_meta_attributes()
+    attributes = common.load_attributes()
+    meta_attributes = common.load_meta_attributes()
 
     df = df.set_index("id", drop=True)
 
