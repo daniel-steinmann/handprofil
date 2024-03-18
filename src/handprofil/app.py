@@ -1,18 +1,25 @@
 # Import packages
 from dash import Dash, html, dash_table, dcc, callback, Output, Input, State, no_update
-
 from dash.exceptions import PreventUpdate
 import pandas as pd
 import plotly.express as px
 import dash_mantine_components as dmc
 import plotly.graph_objects as go
 import base64
+import re
 import datetime as dt
 import io
 import json
 import numpy as np
 import os
 from flask import send_file
+
+from excelparser import parse_contents, upload_is_valid
+
+
+def get_absolute_path(relative_path):
+    directory_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(directory_path, relative_path)
 
 
 def return_wagner_decile(bin_edges: list, value: float) -> int:
@@ -181,78 +188,6 @@ def return_ticktext(plot_df):
     return plot_df.apply(
         lambda x: f"{f'{x.id},':<5} {x.description} ({x.unit})", axis=1
     )
-
-
-def parse_contents(contents, filename, date):
-    content_type, content_string = contents.split(",")
-
-    decoded = base64.b64decode(content_string)
-    try:
-        if "csv" in filename:
-            # Assume that the user uploaded a CSV file
-            df = pd.read_csv(
-                io.StringIO(decoded.decode("utf-8")), sep="|", index_col=False
-            )
-        elif "xls" in filename:
-            # Assume that the user uploaded an excel file
-            df = pd.read_excel(
-                io.BytesIO(decoded),
-            )
-    except Exception as e:
-        print(e)
-        return html.Div(["There was an error processing this file."])
-
-    return df
-
-
-def get_absolute_path(relative_path):
-    directory_path = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(directory_path, relative_path)
-
-
-def upload_is_valid(df) -> dmc.Alert:
-    # Necessary Assertions
-    # 1. Correct Input Format (All required indices must be present in id - column)
-    # 2. At least one value field must have a value
-    attributes = pd.read_csv(
-        get_absolute_path("tables/attributes.csv"), header=0, index_col=False
-    )
-    meta_attributes = pd.read_csv(
-        get_absolute_path("tables/meta_attributes.csv"), header=0, index_col=False
-    )
-
-    validation_set = set(
-        np.concatenate([attributes.id.values, meta_attributes.id.values])
-    )
-
-    upload_set = set(df.id.values)
-
-    missing = validation_set.difference(upload_set)
-    unknown = upload_set.difference(validation_set)
-
-    alert = dmc.Alert(title="Validation error", color="red")
-
-    if missing and unknown:
-        msg = f"Missing IDs: {missing}, Unknown IDs: {unknown}"
-        alert.children = msg
-        return False, alert
-
-    if missing:
-        msg = f"Missing IDs: {missing}"
-        alert.children = msg
-        return False, alert
-
-    if unknown:
-        msg = f"Unknown IDs: {unknown}"
-        alert.children = msg
-        return False, alert
-
-    if df.value.isna().all():
-        msg = f"No values found"
-        alert.children = msg
-        return False, alert
-
-    return True, None
 
 
 # Path
