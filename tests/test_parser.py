@@ -4,7 +4,7 @@ import pandas as pd
 from excelparser import upload_is_valid, validate_meta_attributes
 
 
-def get_absolute_path(relative_path):
+def get_testfile_path(relative_path):
     directory_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(directory_path, relative_path)
 
@@ -23,7 +23,7 @@ def test_validate_upload(filename, expected):
     Testing Upload Function
     """
     # Arrange
-    df = pd.read_excel(get_absolute_path(f"data/{filename}"))
+    df = pd.read_excel(get_testfile_path(f"data/{filename}"))
 
     # Act
     result, _ = upload_is_valid(df)
@@ -42,7 +42,7 @@ def test_validate_upload(filename, expected):
 )
 def test_validate_meta_attributes(filename, expected):
     # Arrange
-    df = pd.read_excel(get_absolute_path(f"data/{filename}"))
+    df = pd.read_excel(get_testfile_path(f"data/{filename}"))
 
     # Act
     result, _ = validate_meta_attributes(df)

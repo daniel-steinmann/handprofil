@@ -8,10 +8,7 @@ import re
 import io
 import numpy as np
 
-
-def get_absolute_path(relative_path):
-    directory_path = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(directory_path, relative_path)
+from common import get_absolute_path
 
 
 def parse_contents(contents, filename, date):
@@ -28,7 +25,7 @@ def parse_contents(contents, filename, date):
             # Assume that the user uploaded an excel file
             df = pd.read_excel(
                 io.BytesIO(decoded),
-            )k
+            )
     except Exception as e:
         print(e)
         return html.Div(["There was an error processing this file."])
@@ -41,10 +38,12 @@ def upload_is_valid(df) -> dmc.Alert:
     # 1. Correct Input Format (All required indices must be present in id - column)
     # 2. At least one value field must have a value
     attributes = pd.read_csv(
-        get_absolute_path("tables/attributes.csv"), header=0, index_col=False
+        get_absolute_path("src/common/tables/attributes.csv"), header=0, index_col=False
     )
     meta_attributes = pd.read_csv(
-        get_absolute_path("tables/meta_attributes.csv"), header=0, index_col=False
+        get_absolute_path("src/common/tables/meta_attributes.csv"),
+        header=0,
+        index_col=False,
     )
 
     validation_set = set(
@@ -88,7 +87,9 @@ def validate_meta_attributes(df) -> dmc.Alert:
     # TODO: Metadata should not be configurable, part of application
 
     meta_attributes = pd.read_csv(
-        get_absolute_path("tables/meta_attributes.csv"), header=0, index_col=False
+        get_absolute_path("src/common/tables/meta_attributes.csv"),
+        header=0,
+        index_col=False,
     )
 
     df = df.set_index("id", drop=True)

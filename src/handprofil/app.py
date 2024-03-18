@@ -15,11 +15,7 @@ import os
 from flask import send_file
 
 from excelparser import parse_contents, upload_is_valid
-
-
-def get_absolute_path(relative_path):
-    directory_path = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(directory_path, relative_path)
+from common import get_absolute_path
 
 
 def return_wagner_decile(bin_edges: list, value: float) -> int:
@@ -201,15 +197,19 @@ if DEBUG_MODE:
 
 # Get data
 attributes = pd.read_csv(
-    get_absolute_path("tables/attributes.csv"), header=0, index_col=False
+    get_absolute_path("src/common/tables/attributes.csv"), header=0, index_col=False
 )
 attributes = attributes.set_index("id", drop=True)
 meta_attributes = pd.read_csv(
-    get_absolute_path("tables/meta_attributes.csv"), header=0, index_col=False
+    get_absolute_path("src/common/tables/meta_attributes.csv"),
+    header=0,
+    index_col=False,
 )
 meta_attributes = meta_attributes.set_index("id", drop=True)
-background = pd.read_csv(get_absolute_path("tables/background.csv"), index_col=0)
-with open(get_absolute_path("config/plot_sections.json"), "r") as file:
+background = pd.read_csv(
+    get_absolute_path("src/common/tables/background.csv"), index_col=0
+)
+with open(get_absolute_path("src/handprofil/config/plot_sections.json"), "r") as file:
     sections = json.load(file)
 
 # Initialize the app - incorporate a Dash Mantine theme
