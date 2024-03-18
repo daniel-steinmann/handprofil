@@ -92,10 +92,11 @@ def display_graph(
     if not result:
         return [], [], alert
 
+    # Display Information about the subject
     subject_grid = return_subject_grid(metadata_df, "switch-subject")
 
+    # Display plots
     bin_values = get_calculated_values(data_df["value"], instrument, sex, hand)
-    bin_values.name = "bin"
 
     decile_plot_df = pd.merge(
         attributes,
