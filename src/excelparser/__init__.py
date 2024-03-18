@@ -1,1 +1,1 @@
-from .parser import parse_contents, upload_is_valid, validate_meta_attributes
+from .parser import parse_contents, validate_upload_format, validate_meta_attributes, validate_upload

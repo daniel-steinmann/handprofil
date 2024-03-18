@@ -1,7 +1,7 @@
 import os
 import pytest
 import pandas as pd
-from excelparser import upload_is_valid, validate_meta_attributes
+from excelparser import validate_upload_format, validate_meta_attributes
 
 
 def get_testfile_path(relative_path):
@@ -26,7 +26,7 @@ def test_upload_is_valid(filename, expected):
     df = pd.read_excel(get_testfile_path(f"data/{filename}"))
 
     # Act
-    result, _ = upload_is_valid(df)
+    result, _ = validate_upload_format(df)
 
     # Assertk
     assert result == expected
@@ -35,6 +35,7 @@ def test_upload_is_valid(filename, expected):
 @pytest.mark.parametrize(
     "filename, expected",
     [
+        ("input_successful.xlsx", True),
         ("input_empty_metadata.xlsx", False),
         ("input_errors_in_metadata.xlsx", False),
     ],

@@ -8,7 +8,7 @@ import json
 import os
 from flask import send_file
 
-from excelparser import parse_contents, upload_is_valid
+from excelparser import parse_contents, validate_upload
 from common import (
     get_absolute_path,
     load_meta_attributes,
@@ -365,7 +365,7 @@ def display_graph(
 
     # Get Uploaded Data (Only First Item) or load sample data
     input_df = children[0]
-    result, alert = upload_is_valid(input_df)
+    result, alert = validate_upload(input_df)
     if result is False:
         upload_alerts.append(alert)
         return [], [], upload_alerts
@@ -472,5 +472,5 @@ def func(n_clicks):
 
 # Run the App
 if __name__ == "__main__":
-    app.run_server(debug=False)
+    app.run_server(debug=True)
     # app.run(debug=True)

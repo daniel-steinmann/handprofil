@@ -31,7 +31,7 @@ def parse_contents(contents, filename, date):
     return df
 
 
-def upload_is_valid(df) -> dmc.Alert:
+def validate_upload_format(df) -> dmc.Alert:
     # Necessary Assertions
     # 1. Correct Input Format (All required indices must be present in id - column)
     # 2. At least one value field must have a value
@@ -94,12 +94,27 @@ def validate_meta_attributes(df) -> dmc.Alert:
         alert.children = msg
         return False, alert
 
-    # ID: Can be anything
-
-    date_pattern = r"^[0-9]{2}.[0-9]{2}.[0-9]{4}$"
-    if not re.match(date_pattern, df.loc["M2", "value"]):
-        msg = f"Invalid date format."
+    if df.loc["M6", "value"] not in ["F", "M", "O"]:
+        msg = f"Invalid gender value. Valid: F,M,O"
         alert.children = msg
+        return False, alert
+
+    if df.loc["M7", "value"] not in ["R", "L", "B"]:
+        msg = f"Invalid handiness. Valid: R,L,B"
+        alert.children = msg
+        return False, alert
+
+    return True, None
+
+
+def validate_upload(df) -> dmc.Alert:
+
+    result, alert = validate_upload_format(df)
+    if result == False:
+        return False, alert
+
+    result, alert = validate_meta_attributes(df)
+    if result == False:
         return False, alert
 
     return True, None
