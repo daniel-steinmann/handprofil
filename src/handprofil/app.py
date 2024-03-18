@@ -10,7 +10,12 @@ from flask import send_file
 
 from calculations import get_calculated_values
 from excelparser import parse_contents, validate_upload, split_metadata_data
-from plotting import return_figure, get_layout, return_subject_grid
+from plotting import (
+    return_section_figure,
+    get_layout,
+    return_subject_grid,
+    wrap_figure_in_graph,
+)
 from common import (
     get_absolute_path,
     load_meta_attributes,
@@ -122,22 +127,8 @@ def display_graph(
 
         if len(valid_indices) > 0:
             df = df.loc[valid_indices, :].reset_index()
-            child = html.Div(
-                [
-                    dmc.Title(f"{section['title']}", order=2),
-                    dcc.Graph(
-                        id="_wait_time_graph",
-                        style={"height": "100%", "width": "100%"},
-                        className="wait_time_graph",
-                        config={
-                            "staticPlot": False,
-                            "editable": False,
-                            "displayModeBar": False,
-                        },
-                        figure=return_figure(df),
-                    ),
-                ]
-            )
+            figure = return_section_figure(df)
+            child = wrap_figure_in_graph(section["title"], figure)
             all_plots_children.append(child)
 
     # Outputs

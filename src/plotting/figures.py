@@ -1,7 +1,9 @@
+import html
 import pandas as pd
 import plotly.express as px
 import dash_mantine_components as dmc
 import plotly.graph_objects as go
+from dash import html, dcc
 
 
 def return_ticktext(plot_df):
@@ -21,7 +23,7 @@ def return_trace(df: pd.DataFrame, color="black"):
     )
 
 
-def return_figure(df: pd.DataFrame):
+def return_section_figure(df: pd.DataFrame):
     """Return figure and add trace.
 
     Dataframe columns:
@@ -124,6 +126,25 @@ def return_figure(df: pd.DataFrame):
     fig.add_trace(return_trace(df))
 
     return fig
+
+
+def wrap_figure_in_graph(title: str, figure):
+    return html.Div(
+        [
+            dmc.Title(title, order=2),
+            dcc.Graph(
+                id="_wait_time_graph",
+                style={"height": "100%", "width": "100%"},
+                className="wait_time_graph",
+                config={
+                    "staticPlot": False,
+                    "editable": False,
+                    "displayModeBar": False,
+                },
+                figure=figure,
+            ),
+        ]
+    )
 
 
 def return_subject_grid(metadata: pd.DataFrame, switch_id: str):
