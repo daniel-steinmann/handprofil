@@ -1,4 +1,4 @@
-instrument,sex,hand,id,1,2,3,4,5,6,7,8,9
+instrument,sex,hand,id,bin_edge_1,bin_edge_2,bin_edge_3,bin_edge_4,bin_edge_5,bin_edge_6,bin_edge_7,bin_edge_8,bin_edge_9
 violine,m,left,101,177.0,181.0,183.0,186.0,188.0,193.0,196.0,196.0,199.0
 violine,m,left,102,79.0,81.0,82.0,84.0,85.0,86.0,86.0,87.0,90.0
 violine,m,left,103,42.0,43.0,43.0,44.0,44.0,45.0,45.0,46.0,47.0

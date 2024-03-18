@@ -118,3 +118,12 @@ def validate_upload(df) -> dmc.Alert:
         return False, alert
 
     return True, None
+
+
+def split_metadata_data(df):
+    attributes = load_attributes()
+    meta_attributes = load_meta_attributes()
+
+    df = df.set_index("id", drop=True)
+
+    return df.loc[meta_attributes.index], df.loc[attributes.index]

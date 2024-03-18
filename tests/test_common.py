@@ -1,4 +1,8 @@
-from common import load_attributes, load_meta_attributes, load_background
+from common import (
+    load_attributes,
+    load_meta_attributes,
+    load_background,
+)
 
 
 def test_load_attributes():

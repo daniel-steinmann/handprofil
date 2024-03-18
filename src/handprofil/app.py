@@ -8,7 +8,8 @@ import json
 import os
 from flask import send_file
 
-from excelparser import parse_contents, validate_upload
+from calculations import return_wagner_decile, get_calculated_values
+from excelparser import parse_contents, validate_upload, split_metadata_data
 from common import (
     get_absolute_path,
     load_meta_attributes,
@@ -23,40 +24,6 @@ def load_plot_section_config():
     ) as file:
         sections = json.load(file)
     return sections
-
-
-def return_wagner_decile(bin_edges: list, value: float) -> int:
-    """Return custom decile bin.
-
-    Returns bin position of value with respect to
-    bin_edges. If value is equal to one of the bin
-    edges, this is also a bin. Below the mapping between
-    bins and edges (with monospace font):
-    Edges:   1   2   3   4   5     6     7     8     9
-    Bins:  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
-    """
-    #   1   2   3   4   5     6     7     8     9
-    # 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
-
-    assert len(bin_edges) == 9
-
-    bin = 1
-    for i, edge in enumerate(bin_edges):
-        if value < edge:
-            break
-        if value == edge:
-            bin = bin + 1
-            break
-        else:
-            bin = bin + 2
-    return bin
-
-
-def summation(num1: int, num2: int) -> int:
-    """
-    Calculate the summation of two number
-    """
-    return num1 + num2
 
 
 def return_trace(df: pd.DataFrame, color="black"):
@@ -370,6 +337,7 @@ def display_graph(
         upload_alerts.append(alert)
         return [], [], upload_alerts
 
+    metadata_df, data_df = split_metadata_data(input_df)
     input_df = input_df.set_index("id", drop=True)
 
     # Get Metadata
@@ -416,12 +384,15 @@ def display_graph(
         lambda row: return_wagner_decile(row.iloc[3:12], row.iloc[12]), axis=1
     )
 
+    bin_values = get_calculated_values(data_df["value"], instrument, sex, hand)
+    bin_values.name = "bin"
+
     decile_plot_df = pd.merge(
         attributes,
-        merged_values[["id", "bin"]],
+        bin_values,
         "inner",
         left_on="id",
-        right_on="id",
+        right_index=True,
     )
 
     # Order by sections
@@ -429,7 +400,6 @@ def display_graph(
     for section in sections:
         df = decile_plot_df.copy()
 
-        df.set_index("id", inplace=True)
         valid_indices = [index for index in section["index_order"] if index in df.index]
 
         if len(valid_indices) > 0:

@@ -1,7 +1,11 @@
 import os
 import pytest
 import pandas as pd
-from excelparser import validate_upload_format, validate_meta_attributes
+from excelparser import (
+    validate_upload_format,
+    validate_meta_attributes,
+    split_metadata_data,
+)
 
 
 def get_testfile_path(relative_path):
@@ -49,3 +53,15 @@ def test_validate_meta_attributes(filename, expected):
 
     # Assert
     assert result == expected
+
+
+def test_split_metadata_data():
+    # Arrange
+    df = pd.read_excel(get_testfile_path(f"data/input_successful.xlsx"))
+
+    # Act
+    metadata_df, data_df = split_metadata_data(df)
+
+    # Assert
+    assert "M1" not in data_df.index
+    assert "1" not in metadata_df.index
