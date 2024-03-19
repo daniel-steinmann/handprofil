@@ -35,9 +35,10 @@ server = app.server
 ###################
 # Data Processing #
 ###################
+
 attributes = common.load_attributes()
 background = common.load_background()
-sections = load_plot_section_config()
+section_config = load_plot_section_config()
 
 input_df = pd.read_excel(common.get_absolute_path(
     "tests/data/input_successful.xlsx"))
@@ -45,28 +46,20 @@ input_df = pd.read_excel(common.get_absolute_path(
 validation_result, alert = excelparser.validate_upload(input_df)
 metadata, data_df = excelparser.split_metadata_data(input_df)
 
-subject_grid = plotting.return_subject_grid(metadata, "switch-subject")
-
-# Select Background with default settings
 bin_edges = calculations.get_bin_edges(
     "gemischt", "m", "right", background)
 measurements_to_bins = calculations.measurements_to_bins(data_df, bin_edges)
 
-# Get Attributes for plot
-decile_plot_df = plotting.join_attributes_to_measurements(
-    measurements_to_bins, attributes
-)
+####################################
+### Create Dynamic Plot Elements ###
+####################################
 
-# Create plots in sections
-plot_df_section_list = plotting.split_reorder_plot_df_to_sections(
-    decile_plot_df, sections
-)
+# Subject Grid
+subject_grid = plotting.return_subject_grid(metadata, "switch-subject")
 
-all_plots_children = []
-for index, section in enumerate(sections):
-    figure = plotting.return_section_figure(plot_df_section_list[index])
-    child = plotting.wrap_figure_in_graph(section["title"], figure)
-    all_plots_children.append(child)
+# Measurement Plots
+plot_sections = plotting.get_plot_sections(
+    measurements_to_bins, attributes, section_config)
 
 #######################
 ####### Layout ########
@@ -188,7 +181,7 @@ app.layout = dmc.Container(
                 ),
             ]
         ),
-        html.Div(id="all_plots", children=all_plots_children),
+        html.Div(id="all_plots", children=plot_sections),
     ],
     fluid=True,
 )
