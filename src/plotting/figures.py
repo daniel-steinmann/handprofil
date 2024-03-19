@@ -8,7 +8,7 @@ from dash import html, dcc
 
 def return_ticktext(plot_df):
     return plot_df.apply(
-        lambda x: f"{f'{x.id},':<5} {x.description} ({x.unit})", axis=1
+        lambda x: f"{f'{x.id:0.0f},':<5} {x.description} ({x.unit})", axis=1
     )
 
 
@@ -135,7 +135,8 @@ def return_subject_grid(metadata: pd.Series, switch_id: str):
         ),
         dmc.Col(
             [
-                dmc.Text(f"Geburtsdatum: {metadata.loc['M5'].strftime('%d.%m.%Y')}"),
+                dmc.Text(
+                    f"Geburtsdatum: {metadata.loc['M5'].strftime('%d.%m.%Y')}"),
                 dmc.Text(f"Geschlecht: {metadata.loc['M6']}"),
                 dmc.Text(f"Händigkeit: {metadata.loc['M7']}"),
                 dmc.Text(f"Instrument: {metadata.loc['M8']}"),
