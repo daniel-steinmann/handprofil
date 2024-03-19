@@ -6,13 +6,13 @@ import plotly.graph_objects as go
 from dash import html, dcc
 
 
-def return_ticktext(plot_df):
+def __return_ticktext(plot_df):
     return plot_df.apply(
         lambda x: f"{f'{x.id:0.0f},':<5} {x.description} ({x.unit})", axis=1
     )
 
 
-def return_trace(df: pd.DataFrame, color="black"):
+def __return_trace(df: pd.DataFrame, color="black"):
     return go.Scatter(
         x=df.value,
         y=df.index,
@@ -27,7 +27,7 @@ def return_section_figure(df: pd.DataFrame):
     labelmargin = 200
 
     fig = px.scatter()
-    ticktext = return_ticktext(df)
+    ticktext = __return_ticktext(df)
 
     fig.update_layout(
         width=1000,
@@ -98,7 +98,7 @@ def return_section_figure(df: pd.DataFrame):
         )
     )
 
-    fig.add_trace(return_trace(df))
+    fig.add_trace(__return_trace(df))
 
     return fig
 
