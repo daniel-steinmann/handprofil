@@ -36,7 +36,7 @@ def test_get_bin_edges():
 
 def test_get_calculated_values():
     ids = [101, 103]
-    values = [197, 43]
+    values = [197.0, 43.0]
     input_series = pd.Series(values, index=ids, name="measurement")
 
     background = common.load_background()
@@ -52,7 +52,7 @@ def test_get_calculated_values():
 
 def test_get_calculated_values_if_index_not_in_background():
     ids = [500]
-    values = [1]
+    values = [1.0]
     input_series = pd.Series(values, index=ids, name="measurement")
 
     background = common.load_background()

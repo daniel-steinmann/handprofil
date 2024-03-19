@@ -126,7 +126,7 @@ def split_metadata_data(df):
 
     df = df.set_index("id", drop=True)
 
-    return df.loc[meta_attributes.index, "value"], df.loc[attributes.index, "value"]
+    return df.loc[meta_attributes.index, "value"], df.loc[attributes.index, "value"].astype(float).dropna()
 
 
 def parse_and_validate_uploads(

@@ -1,5 +1,7 @@
 import html
 import pandas as pd
+import pandera as pa
+from pandera import Column, DataFrameSchema
 import plotly.express as px
 import dash_mantine_components as dmc
 import plotly.graph_objects as go
@@ -23,6 +25,19 @@ def return_trace(df: pd.DataFrame, color="black"):
     )
 
 
+figure_in_schema = DataFrameSchema(
+    {
+        "id": Column(int),
+        "device": Column(str),
+        "hand": Column(str),
+        "description": Column(str),
+        "unit": Column(str),
+        "value": Column(int),
+    }
+)
+
+
+@pa.check_input(figure_in_schema)
 def return_section_figure(df: pd.DataFrame):
     labelmargin = 200
 
@@ -135,7 +150,8 @@ def return_subject_grid(metadata: pd.Series, switch_id: str):
         ),
         dmc.Col(
             [
-                dmc.Text(f"Geburtsdatum: {metadata.loc['M5'].strftime('%d.%m.%Y')}"),
+                dmc.Text(
+                    f"Geburtsdatum: {metadata.loc['M5'].strftime('%d.%m.%Y')}"),
                 dmc.Text(f"Geschlecht: {metadata.loc['M6']}"),
                 dmc.Text(f"Händigkeit: {metadata.loc['M7']}"),
                 dmc.Text(f"Instrument: {metadata.loc['M8']}"),

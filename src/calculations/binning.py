@@ -1,7 +1,41 @@
 import pandas as pd
 import common
+import pandera as pa
+from pandera import Column, Index, DataFrameSchema, SeriesSchema
+
+background_schema = DataFrameSchema({
+    "instrument": Column(str),
+    "sex": Column(str),
+    "hand": Column(str),
+    "id": Column(int),
+    "bin_edge_1": Column(float),
+    "bin_edge_2": Column(float),
+    "bin_edge_3": Column(float),
+    "bin_edge_4": Column(float),
+    "bin_edge_5": Column(float),
+    "bin_edge_6": Column(float),
+    "bin_edge_7": Column(float),
+    "bin_edge_8": Column(float),
+    "bin_edge_9": Column(float),
+},
+    index=Index(int))
+
+bin_edges_schema = DataFrameSchema({
+    "bin_edge_1": Column(float),
+    "bin_edge_2": Column(float),
+    "bin_edge_3": Column(float),
+    "bin_edge_4": Column(float),
+    "bin_edge_5": Column(float),
+    "bin_edge_6": Column(float),
+    "bin_edge_7": Column(float),
+    "bin_edge_8": Column(float),
+    "bin_edge_9": Column(float),
+},
+    index=Index(int))  # Id is in Index
 
 
+@pa.check_input(background_schema, "background")
+@pa.check_output(bin_edges_schema)
 def get_bin_edges(
     instrument: str, sex: str, hand: str, background: pd.DataFrame
 ) -> pd.DataFrame:
@@ -31,13 +65,22 @@ def get_bin_edges(
     return bin_edges
 
 
-def measurements_to_bins(
-    measurements_schema: pd.Series,
-    bin_edges: pd.DataFrame,
-) -> pd.Series:
+measurement_schema = SeriesSchema(
+    float,
+    index=Index(int)
+)
+
+bin_schema = SeriesSchema(
+    int,
+    index=Index(int)
+)
+
+
+# @pa.check_io(measurements=measurement_schema, bin_edges=bin_edges_schema, out=bin_schema)
+def measurements_to_bins(measurements: pd.Series, bin_edges: pd.DataFrame) -> pd.Series:
 
     output = pd.Series(dtype=pd.Int64Dtype)
-    for index, measurement in measurements_schema.items():
+    for index, measurement in measurements.items():
         if index in bin_edges.index:
             bin = return_wagner_decile(bin_edges.loc[index], measurement)
             output.loc[index] = bin
