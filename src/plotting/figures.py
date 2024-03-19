@@ -14,7 +14,7 @@ def return_ticktext(plot_df):
 
 def return_trace(df: pd.DataFrame, color="black"):
     return go.Scatter(
-        x=df.bin,
+        x=df.value,
         y=df.index,
         marker=dict(size=16, color=color),
         mode="lines+markers",
@@ -24,31 +24,6 @@ def return_trace(df: pd.DataFrame, color="black"):
 
 
 def return_section_figure(df: pd.DataFrame):
-    """Return figure and add trace.
-
-    Dataframe columns:
-    id: int
-    device: string
-    hand: string
-    description: string
-    unit: string
-    bin: string
-    """
-
-    input_schema = pd.DataFrame(
-        {
-            "id": 1,
-            "device": "Handlabor",
-            "hand": "Rechts",
-            "description": "Handlänge",
-            "unit": "mm",
-            "bin": 1,
-        },
-        index=[0],
-    )
-
-    assert df.dtypes.equals(input_schema.dtypes)
-
     labelmargin = 200
 
     fig = px.scatter()

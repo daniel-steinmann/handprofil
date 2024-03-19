@@ -8,4 +8,4 @@ openpyxl
 pytest
 pyarrow
 gunicorn
-re
+pandera
