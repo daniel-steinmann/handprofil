@@ -344,7 +344,7 @@ def process_uploaded(data: dict):
 def delete_file_from_store(n_clicks, id: dict, data: dict):
     for i, clicks in enumerate(n_clicks):
         if clicks > 0:
-            del data[id[i]['index']]
+            data.pop(id[i]['index'])
             return data
     return data
 
