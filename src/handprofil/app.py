@@ -3,29 +3,15 @@
 ### Imports ######
 ###################
 
-from dash import Dash, html, dcc, callback, Output, Input, State, no_update
+from dash import Dash, html, dcc, callback, Output, Input
 import pandas as pd
-import plotly.express as px
 import dash_mantine_components as dmc
-import plotly.graph_objects as go
-import json
 import os
 from flask import send_file
 
-from .uploadparser import (
-    validate_upload,
-    split_metadata_data
-)
-from .utils import (
-    load_attributes,
-    load_background,
-    get_absolute_path,
-    load_plot_section_config
-)
-from .frontend import (
-    return_subject_grid,
-    get_plot_sections
-)
+import uploadparser
+import utils
+import frontend
 
 ###################
 # Methods #
@@ -119,15 +105,15 @@ server = app.server
 # Data Processing #
 ###################
 
-attributes = load_attributes()
-background = load_background()
-section_config = load_plot_section_config()
+attributes = utils.load_attributes()
+background = utils.load_background()
+section_config = utils.load_plot_section_config()
 
-input_df = pd.read_excel(get_absolute_path(
+input_df = pd.read_excel(utils.get_absolute_path(
     "tests/data/input_successful.xlsx"))
 
-validation_result, alert = validate_upload(input_df)
-metadata, data_df = split_metadata_data(input_df)
+validation_result, alert = uploadparser.validate_upload(input_df)
+metadata, data_df = uploadparser.split_metadata_data(input_df)
 
 bin_edges = get_bin_edges(
     "gemischt", "m", "right", background)
@@ -138,10 +124,10 @@ binned_measurements = measurements_to_bins(data_df, bin_edges)
 ####################################
 
 # Subject Grid
-subject_grid = return_subject_grid(metadata, "switch-subject")
+subject_grid = frontend.return_subject_grid(metadata, "switch-subject")
 
 # Measurement Plots
-plot_sections = get_plot_sections(
+plot_sections = frontend.get_plot_sections(
     binned_measurements, attributes, section_config)
 
 #######################
@@ -252,7 +238,7 @@ app.layout = dmc.Container(
 
 @app.server.route("/download/")
 def download_excel():
-    return send_file(get_absolute_path("download/measurement_template.xlsx"))
+    return send_file(utils.get_absolute_path("download/measurement_template.xlsx"))
 
 
 @callback(
@@ -261,7 +247,7 @@ def download_excel():
     prevent_initial_call=True,
 )
 def func(n_clicks):
-    return dcc.send_file(get_absolute_path("download/measurement_template.xlsx"))
+    return dcc.send_file(utils.get_absolute_path("download/measurement_template.xlsx"))
 
 
 #######################

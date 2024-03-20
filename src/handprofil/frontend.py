@@ -4,13 +4,7 @@ import plotly.express as px
 import dash_mantine_components as dmc
 import plotly.graph_objects as go
 from dash import html, dcc
-import json
 import pandas as pd
-
-from .utils import (
-    get_absolute_path,
-    load_plot_section_config
-)
 
 
 def __return_ticktext(plot_df):
@@ -155,6 +149,7 @@ def return_subject_grid(metadata: pd.Series, switch_id: str):
         ),
         dmc.Switch(id=switch_id),
     ]
+
 
 def get_plot_sections(values, attributes, section_config):
     merged = attributes.merge(values.rename(
