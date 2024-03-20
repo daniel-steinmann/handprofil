@@ -9,3 +9,4 @@ pytest
 pyarrow
 gunicorn
 pandera
+dash-iconify

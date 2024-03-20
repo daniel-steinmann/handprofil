@@ -5,6 +5,16 @@ import dash_mantine_components as dmc
 import plotly.graph_objects as go
 from dash import html, dcc
 import pandas as pd
+from dash_iconify import DashIconify
+
+###################
+# Constants #
+###################
+
+hand_data = {
+    "labels": ["Links", "Rechts"],
+    "values": ["left", "right"],
+}
 
 
 def __return_ticktext(plot_df):
@@ -109,7 +119,7 @@ def wrap_figure_in_graph(title: str, figure):
         [
             dmc.Title(title, order=2),
             dcc.Graph(
-                id="_wait_time_graph",
+                # id="_wait_time_graph",
                 style={"height": "100%", "width": "100%"},
                 className="wait_time_graph",
                 config={
@@ -127,28 +137,50 @@ def wrap_figure_in_graph(title: str, figure):
 
 
 def return_subject_grid(metadata: pd.Series, switch_id: str):
-    return [
-        dmc.Col(
+    return dmc.SimpleGrid(cols=4, children=[
+        dmc.Container(
             [
-                dmc.Text(f"ID: {metadata.loc['M1']}"),
+                dmc.Text(f"Id: {metadata.loc['M1']}"),
                 dmc.Text(f"Datum: {metadata.loc['M2'].strftime('%d.%m.%Y')}"),
                 dmc.Text(f"Name: {metadata.loc['M3']}"),
                 dmc.Text(f"Vorname: {metadata.loc['M4']}"),
-            ],
-            span="auto",
+            ]
         ),
-        dmc.Col(
+        dmc.Container(
             [
                 dmc.Text(
                     f"Geburtsdatum: {metadata.loc['M5'].strftime('%d.%m.%Y')}"),
                 dmc.Text(f"Geschlecht: {metadata.loc['M6']}"),
                 dmc.Text(f"Händigkeit: {metadata.loc['M7']}"),
                 dmc.Text(f"Instrument: {metadata.loc['M8']}"),
-            ],
-            span="auto",
+            ]
         ),
-        dmc.Switch(id=switch_id),
-    ]
+        dmc.Container(
+            children=[
+                dmc.Text("Anzeigen"),
+                dmc.ChipGroup(
+                    [
+                        dmc.Chip(
+                            x,
+                            value=x,
+                            variant="outline",
+                        )
+                        for x in hand_data["labels"]
+                    ],
+                    id="chips-values",
+                    value=hand_data["values"],
+                    multiple=True,
+                    mt=10,
+                )]),
+        dmc.Container(children=[dmc.ActionIcon(
+            DashIconify(icon="mdi:trash", width=20),
+            size="lg",
+            variant="filled",
+            id="action-icon",
+            n_clicks=0,
+            mb=10,
+        )])
+    ])
 
 
 def get_plot_sections(values, attributes, section_config):

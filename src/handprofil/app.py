@@ -14,6 +14,56 @@ import utils
 import frontend
 
 ###################
+# Constants #
+###################
+
+plot_style_data = [
+    {"value": "decile", "label": "Dezile"}
+]
+
+instrument_data = [
+    {"value": "violine",
+     "label": "Violine"},
+    {
+        "value": "violoncello",
+        "label": "Violoncello",
+    },
+    {
+        "value": "schlagzeug",
+        "label": "Schlagzeug",
+    },
+    {"value": "klavier",
+     "label": "Klavier"},
+    {"value": "gitarre",
+     "label": "Gitarre"},
+    {"value": "egitarre",
+     "label": "E-Gitarre"},
+    {
+        "value": "akkordeon",
+        "label": "Akkordeon",
+    },
+    {"value": "gemischt",
+     "label": "Gemischt"},
+]
+
+sex_data = [
+    ["m", "Männlich"],
+    ["w", "Weiblich"],
+]
+
+###################
+### Styles ########
+###################
+
+container_style = {
+    "border": f"1px solid black",
+    "borderRadius": 8,
+    "padding": 20,
+    "marginTop": 20,
+    "marginBottom": 20,
+}
+
+###################
 # Methods #
 ###################
 
@@ -139,94 +189,89 @@ app.layout = dmc.Container(
     [
         dmc.Header(height=60, children=[dmc.Center(
             dmc.Title("Handlabor", order=1))]),
-        dmc.Title("Datensätze", order=2),
-        dmc.Group(
+        dmc.Container(
+            style=container_style,
             children=[
-                dcc.Upload(
-                    id="upload-data",
-                    children=dmc.Button('Datei hochladen'),
-                    # Allow multiple files to be uploaded
-                    multiple=True,
-                ),
-                html.Div(
-                    [
-                        dmc.Button("Vorlage herunterladen (.xlsx)",
-                                   id="btn_image"),
-                        dcc.Download(id="download-xlsx"),
+                dmc.SimpleGrid(
+                    cols=3,
+                    children=[
+                        dcc.Upload(
+                            id="upload-data",
+                            children=dmc.Button('Datei hochladen'),
+                            # Allow multiple files to be uploaded
+                            multiple=True,
+                        ),
+                        html.Div(
+                            [
+                                dmc.Button("Vorlage herunterladen (.xlsx)",
+                                           id="btn_image"),
+                                dcc.Download(id="download-xlsx"),
+                            ]
+                        ),
+                        dmc.Button("Druckansicht",
+                                   id="btn_printview")
+                    ])
+            ]
+        ),
+        dmc.Container(
+            style=container_style,
+            children=[
+                dmc.Center(
+                    children=[
+                        dmc.Select(
+                            label="Darstellung",
+                            searchable=True,
+                            placeholder="Select one",
+                            id="select-plotstyle",
+                            value="decile",
+                            data=plot_style_data,
+                            style={"width": 200,
+                                   "marginBottom": 10},
+                        )
                     ]
                 )
             ]
         ),
-        dmc.Container(id="upload-alerts"),
-        dmc.Grid(subject_grid, id="subject-grid"),
-        dmc.Grid(subject_grid, id="subject-grid-2"),
         dmc.Container(
+            style=container_style,
+            children=[
+                dmc.Title(dmc.Text("Uploads"), order=2),
+                dmc.Container(id="upload-alerts"),
+                subject_grid
+            ]),
+        dmc.Container(
+            style=container_style,
             children=[
                 dmc.Title("Hintergrund", order=2),
-                dmc.RadioGroup(
-                    [
-                        dmc.Radio(l, value=k)
-                        for k, l in [
-                            ["m", "Männlich"],
-                            ["w", "Weiblich"],
-                        ]
-                    ],
-                    id="radiogroup-sex",
-                    value="m",
-                    label="Geschlecht",
-                    size="sm",
-                    mt=10,
-                ),
-                dmc.Select(
-                    label="Instrument",
-                    searchable=True,
-                    placeholder="Select one",
-                    id="select-instrument",
-                    value="gemischt",
-                    data=[
-                        {"value": "violine",
-                         "label": "Violine"},
-                        {
-                            "value": "violoncello",
-                            "label": "Violoncello",
-                        },
-                        {
-                            "value": "schlagzeug",
-                            "label": "Schlagzeug",
-                        },
-                        {"value": "klavier",
-                         "label": "Klavier"},
-                        {"value": "gitarre",
-                         "label": "Gitarre"},
-                        {"value": "egitarre",
-                         "label": "E-Gitarre"},
-                        {
-                            "value": "akkordeon",
-                            "label": "Akkordeon",
-                        },
-                        {"value": "gemischt",
-                         "label": "Gemischt"},
-                    ],
-                    style={"width": 200,
-                           "marginBottom": 10},
-                ),
-                dmc.RadioGroup(
-                    [
-                        dmc.Radio(l, value=k)
-                        for k, l in [
-                            ["right", "Rechts"],
-                            ["left", "Links"],
-                        ]
-                    ],
-                    id="radiogroup-hand",
-                    value="right",
-                    label="Hand",
-                    size="sm",
-                    mt=10,
-                )
+                dmc.SimpleGrid(
+                    cols=3,
+                    children=[
+                        dmc.RadioGroup(
+                            [
+                                dmc.Radio(l, value=k)
+                                for k, l in sex_data
+                            ],
+                            id="radiogroup-sex",
+                            value="m",
+                            label="Geschlecht",
+                            size="sm",
+                            mt=10,
+                        ),
+                        dmc.Select(
+                            label="Instrument",
+                            searchable=True,
+                            placeholder="Select one",
+                            id="select-instrument",
+                            value="gemischt",
+                            data=instrument_data,
+                            style={"width": 200,
+                                   "marginBottom": 10},
+                        )
+                    ])
             ]
         ),
-        html.Div(id="all_plots", children=plot_sections),
+        dmc.Container(id="all_plots", style=container_style,
+                      children=plot_sections)
     ],
     fluid=True,
 )
