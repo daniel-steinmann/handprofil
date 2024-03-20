@@ -3,11 +3,14 @@
 ### Imports ######
 ###################
 
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import Dash, html, dcc, callback, Output, Input, State, ALL
 import pandas as pd
 import dash_mantine_components as dmc
 import os
 from flask import send_file
+from dash.exceptions import PreventUpdate
+import uuid
+from dash_iconify import DashIconify
 
 import uploadparser
 import utils
@@ -198,7 +201,6 @@ app.layout = dmc.Container(
                         dcc.Upload(
                             id="upload-data",
                             children=dmc.Button('Datei hochladen'),
-                            # Allow multiple files to be uploaded
                             multiple=True,
                         ),
                         html.Div(
@@ -232,6 +234,13 @@ app.layout = dmc.Container(
                 )
             ]
         ),
+        dmc.Container(
+            style=container_style,
+            children=[
+                dcc.Store(id='store', storage_type='memory'),
+                dmc.Title(dmc.Text("Uploads Debugger"), order=2),
+                dmc.Container(id="upload-debug-container"),
+            ]),
         dmc.Container(
             style=container_style,
             children=[
@@ -281,9 +290,55 @@ app.layout = dmc.Container(
 #######################
 
 
-@app.server.route("/download/")
-def download_excel():
-    return send_file(utils.get_absolute_path("download/measurement_template.xlsx"))
+@callback(
+    Output('store', 'data'),
+    # Workaround for https://github.com/plotly/dash-core-components/issues/816
+    Output('upload-data', 'contents'),
+    Input('upload-data', 'contents'),
+    State('upload-data', 'filename'),
+    State('upload-data', 'last_modified'),
+    State('store', 'data'),
+    prevent_initial_call=True
+)
+def upload_files_to_store(list_of_contents, list_of_names, list_of_dates, store_state):
+    if list_of_contents is None:
+        raise PreventUpdate
+
+    dataframes = [
+        uploadparser.parse_contents(c, n, d) for c, n, d in
+        zip(list_of_contents, list_of_names, list_of_dates)]
+
+    new_items = {
+        str(uuid.uuid4()): df.to_dict() for df in dataframes
+    }
+
+    export = store_state | new_items if store_state else new_items
+    return export, None
+
+
+@callback(
+    Output('upload-debug-container', 'children'),
+    Input('store', 'data'),
+    prevent_initial_call=True
+)
+def process_uploaded(data: dict):
+    return [dmc.Container([
+        html.Div(f"File-UUID: {id} "),
+        dmc.ActionIcon(
+            DashIconify(icon="mdi:trash", width=20),
+            size="lg",
+            variant="filled",
+            id={"type": "delete-file-button", "index": {id}},
+            n_clicks=0,
+            mb=10,
+        )]) for id, value in data.items()]
+
+
+@callback(
+    Input({"type": "delete-file-button", "index": ALL}, "n_clicks")
+)
+def delete_file_from_store():
+    return True
 
 
 @callback(
@@ -292,7 +347,7 @@ def download_excel():
     prevent_initial_call=True,
 )
 def func(n_clicks):
-    return dcc.send_file(utils.get_absolute_path("download/measurement_template.xlsx"))
+    return dcc.send_file(utils.get_absolute_path("src/handprofil/download/measurement_template.xlsx"))
 
 
 #######################
