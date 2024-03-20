@@ -251,7 +251,7 @@ app.layout = dmc.Container(
         dmc.Container(
             style=container_style,
             children=[
-                dmc.Title("Hintergrund", order=2),
+                dmc.Title("Vergleichsgruppe (Hintergrund)", order=2),
                 dmc.SimpleGrid(
                     cols=3,
                     children=[
