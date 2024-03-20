@@ -1,7 +1,8 @@
-from common import (
+from handprofil.utils import (
     load_attributes,
-    load_meta_attributes,
     load_background,
+    load_meta_attributes,
+    load_plot_section_config
 )
 
 
@@ -38,3 +39,10 @@ def test_load_background():
 
     # Assert
     assert len(df.columns) == 13
+
+
+def test_load_plot_section_config():
+
+    section = load_plot_section_config()
+
+    assert isinstance(section, list)

@@ -1,13 +1,18 @@
 import pandas as pd
-import plotting
+from handprofil.frontend import (
+    split_reorder_plot_df_to_sections
+)
+from handprofil.utils import (
+    load_plot_section_config
+)
 
 
 def test_split_plot_df_to_sections():
     input = pd.DataFrame(
         data={"values": [1, 1, 1, 1, 1, 1, 1]}, index=[1, 3, 21, 24, 39, 47, 81]
     )
-    config = plotting.load_plot_section_config()
-    output = plotting.split_reorder_plot_df_to_sections(input, config)
+    config = load_plot_section_config()
+    output = split_reorder_plot_df_to_sections(input, config)
 
     assert len(output) == len(config)
     assert equal(output[0].index, [0, 1, 2])
@@ -17,7 +22,7 @@ def test_split_plot_df_to_sections():
 
 
 def test_load_plot_section_config():
-    config = plotting.load_plot_section_config()
+    config = load_plot_section_config()
     assert len(config) == 3
 
 

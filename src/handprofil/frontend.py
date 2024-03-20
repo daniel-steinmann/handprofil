@@ -4,6 +4,13 @@ import plotly.express as px
 import dash_mantine_components as dmc
 import plotly.graph_objects as go
 from dash import html, dcc
+import json
+import pandas as pd
+
+from .utils import (
+    get_absolute_path,
+    load_plot_section_config
+)
 
 
 def __return_ticktext(plot_df):
@@ -117,8 +124,11 @@ def wrap_figure_in_graph(title: str, figure):
                     "displayModeBar": False,
                 },
                 figure=figure,
-            ),
-        ]
+            )
+        ],
+        style={
+            # "padding-left": "20px",
+        }
     )
 
 
@@ -145,3 +155,30 @@ def return_subject_grid(metadata: pd.Series, switch_id: str):
         ),
         dmc.Switch(id=switch_id),
     ]
+
+def get_plot_sections(values, attributes, section_config):
+    merged = attributes.merge(values.rename(
+        'value'), left_index=True, right_index=True)
+    data_per_section = split_reorder_plot_df_to_sections(
+        merged, section_config)
+
+    all_plots_children = []
+    for index, section in enumerate(section_config):
+        figure = return_section_figure(data_per_section[index])
+        child = wrap_figure_in_graph(section["title"], figure)
+        all_plots_children.append(child)
+
+    return all_plots_children
+
+
+def split_reorder_plot_df_to_sections(plot_df: pd.DataFrame, section_config: list):
+    plot_df["id"] = plot_df.index.values
+    output_dfs = []
+    for value in section_config:
+        index_data = value["index_order"]
+        index = pd.Index(index_data)
+        output_df = plot_df.reindex(index).dropna(
+            axis=0).reset_index(drop=True)
+        output_dfs.append(output_df)
+
+    return output_dfs

@@ -1,4 +1,8 @@
-# Import packages
+
+###################
+### Imports ######
+###################
+
 from dash import Dash, html, dcc, callback, Output, Input, State, no_update
 import pandas as pd
 import plotly.express as px
@@ -8,19 +12,98 @@ import json
 import os
 from flask import send_file
 
-import calculations
-import excelparser
-import plotting
-import common
+from .uploadparser import (
+    validate_upload,
+    split_metadata_data
+)
+from .utils import (
+    load_attributes,
+    load_background,
+    get_absolute_path,
+    load_plot_section_config
+)
+from .frontend import (
+    return_subject_grid,
+    get_plot_sections
+)
+
+###################
+# Methods #
+###################
 
 
-def load_plot_section_config():
-    with open(
-        common.get_absolute_path(
-            "src/handprofil/config/plot_sections.json"), "r"
-    ) as file:
-        sections = json.load(file)
-    return sections
+def get_bin_edges(
+    instrument: str, sex: str, hand: str, background: pd.DataFrame
+) -> pd.DataFrame:
+
+    assert instrument in background["instrument"].unique()
+    assert hand in background["hand"].unique()
+    assert sex in background["sex"].unique()
+
+    background_filtered = background.query(
+        "instrument == @instrument & sex == @sex & hand == @hand"
+    ).set_index("id", drop=True)
+
+    bin_edges = background_filtered[
+        [
+            "bin_edge_1",
+            "bin_edge_2",
+            "bin_edge_3",
+            "bin_edge_4",
+            "bin_edge_5",
+            "bin_edge_6",
+            "bin_edge_7",
+            "bin_edge_8",
+            "bin_edge_9",
+        ]
+    ]
+
+    return bin_edges
+
+
+def measurements_to_bins(
+    measurements_schema: pd.Series,
+    bin_edges: pd.DataFrame,
+) -> pd.Series:
+
+    output = pd.Series(dtype=pd.Int64Dtype)
+    for index, measurement in measurements_schema.items():
+        if index in bin_edges.index:
+            bin = return_wagner_decile(bin_edges.loc[index], measurement)
+            output.loc[index] = bin
+
+    return output
+
+
+def return_wagner_decile(bin_edges: list, value: float) -> int:
+    """Return custom decile bin.
+
+    Returns bin position of value with respect to
+    bin_edges. If value is equal to one of the bin
+    edges, this is also a bin. Below the mapping between
+    bins and edges (with monospace font):
+    Edges:   1   2   3   4   5     6     7     8     9
+    Bins:  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+    """
+    #   1   2   3   4   5     6     7     8     9
+    # 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+
+    assert len(bin_edges) == 9
+
+    bin = 1
+    for i, edge in enumerate(bin_edges):
+        if value < edge:
+            break
+        if value == edge:
+            bin = bin + 1
+            break
+        else:
+            bin = bin + 2
+    return bin
+
+###################
+###### Dash #######
+###################
 
 
 # Path
@@ -36,30 +119,30 @@ server = app.server
 # Data Processing #
 ###################
 
-attributes = common.load_attributes()
-background = common.load_background()
+attributes = load_attributes()
+background = load_background()
 section_config = load_plot_section_config()
 
-input_df = pd.read_excel(common.get_absolute_path(
+input_df = pd.read_excel(get_absolute_path(
     "tests/data/input_successful.xlsx"))
 
-validation_result, alert = excelparser.validate_upload(input_df)
-metadata, data_df = excelparser.split_metadata_data(input_df)
+validation_result, alert = validate_upload(input_df)
+metadata, data_df = split_metadata_data(input_df)
 
-bin_edges = calculations.get_bin_edges(
+bin_edges = get_bin_edges(
     "gemischt", "m", "right", background)
-measurements_to_bins = calculations.measurements_to_bins(data_df, bin_edges)
+binned_measurements = measurements_to_bins(data_df, bin_edges)
 
 ####################################
 ### Create Dynamic Plot Elements ###
 ####################################
 
 # Subject Grid
-subject_grid = plotting.return_subject_grid(metadata, "switch-subject")
+subject_grid = return_subject_grid(metadata, "switch-subject")
 
 # Measurement Plots
-plot_sections = plotting.get_plot_sections(
-    measurements_to_bins, attributes, section_config)
+plot_sections = get_plot_sections(
+    binned_measurements, attributes, section_config)
 
 #######################
 ####### Layout ########
@@ -68,117 +151,93 @@ plot_sections = plotting.get_plot_sections(
 # App layout
 app.layout = dmc.Container(
     [
-        dmc.Title("Handlabor"),
-        html.Div(
-            [
-                dmc.Button("Download Template (.xlsx)", id="btn_image"),
-                dcc.Download(id="download-xlsx"),
+        dmc.Header(height=60, children=[dmc.Center(
+            dmc.Title("Handlabor", order=1))]),
+        dmc.Title("Datensätze", order=2),
+        dmc.Group(
+            children=[
+                dcc.Upload(
+                    id="upload-data",
+                    children=dmc.Button('Datei hochladen'),
+                    # Allow multiple files to be uploaded
+                    multiple=True,
+                ),
+                html.Div(
+                    [
+                        dmc.Button("Vorlage herunterladen (.xlsx)",
+                                   id="btn_image"),
+                        dcc.Download(id="download-xlsx"),
+                    ]
+                )
             ]
         ),
-        dmc.Title("Upload", order=2),
-        dcc.Upload(
-            id="upload-data",
-            children=html.Div(
-                ["Drag and Drop or ", html.A("Select Files")]),
-            style={
-                "width": "100%",
-                "height": "60px",
-                "lineHeight": "60px",
-                "borderWidth": "1px",
-                "borderStyle": "dashed",
-                "borderRadius": "5px",
-                "textAlign": "center",
-                "margin": "10px",
-            },
-            # Allow multiple files to be uploaded
-            multiple=True,
-        ),
         dmc.Container(id="upload-alerts"),
-        dmc.Title("Datensätze", order=2),
         dmc.Grid(subject_grid, id="subject-grid"),
-        dmc.Grid(
-            [
-                dmc.Col(
+        dmc.Grid(subject_grid, id="subject-grid-2"),
+        dmc.Container(
+            children=[
+                dmc.Title("Hintergrund", order=2),
+                dmc.RadioGroup(
                     [
-                        dmc.Card(
-                            children=[
-                                dmc.Title("Hintergrund", order=2),
-                                dmc.RadioGroup(
-                                    [
-                                        dmc.Radio(l, value=k)
-                                        for k, l in [
-                                            ["m", "Männlich"],
-                                            ["w", "Weiblich"],
-                                        ]
-                                    ],
-                                    id="radiogroup-sex",
-                                    value="m",
-                                    label="Geschlecht",
-                                    size="sm",
-                                    mt=10,
-                                ),
-                                dmc.Select(
-                                    label="Instrument",
-                                    searchable=True,
-                                    placeholder="Select one",
-                                    id="select-instrument",
-                                    value="gemischt",
-                                    data=[
-                                        {"value": "violine",
-                                                "label": "Violine"},
-                                        {
-                                            "value": "violoncello",
-                                            "label": "Violoncello",
-                                        },
-                                        {
-                                            "value": "schlagzeug",
-                                            "label": "Schlagzeug",
-                                        },
-                                        {"value": "klavier",
-                                         "label": "Klavier"},
-                                        {"value": "gitarre",
-                                         "label": "Gitarre"},
-                                        {"value": "egitarre",
-                                         "label": "E-Gitarre"},
-                                        {
-                                            "value": "akkordeon",
-                                            "label": "Akkordeon",
-                                        },
-                                        {"value": "gemischt",
-                                         "label": "Gemischt"},
-                                    ],
-                                    style={"width": 200,
-                                           "marginBottom": 10},
-                                ),
-                            ]
-                        ),
+                        dmc.Radio(l, value=k)
+                        for k, l in [
+                            ["m", "Männlich"],
+                            ["w", "Weiblich"],
+                        ]
                     ],
-                    span="auto",
+                    id="radiogroup-sex",
+                    value="m",
+                    label="Geschlecht",
+                    size="sm",
+                    mt=10,
                 ),
-                dmc.Col(
+                dmc.Select(
+                    label="Instrument",
+                    searchable=True,
+                    placeholder="Select one",
+                    id="select-instrument",
+                    value="gemischt",
+                    data=[
+                        {"value": "violine",
+                         "label": "Violine"},
+                        {
+                            "value": "violoncello",
+                            "label": "Violoncello",
+                        },
+                        {
+                            "value": "schlagzeug",
+                            "label": "Schlagzeug",
+                        },
+                        {"value": "klavier",
+                         "label": "Klavier"},
+                        {"value": "gitarre",
+                         "label": "Gitarre"},
+                        {"value": "egitarre",
+                         "label": "E-Gitarre"},
+                        {
+                            "value": "akkordeon",
+                            "label": "Akkordeon",
+                        },
+                        {"value": "gemischt",
+                         "label": "Gemischt"},
+                    ],
+                    style={"width": 200,
+                           "marginBottom": 10},
+                ),
+                dmc.RadioGroup(
                     [
-                        dmc.Card(
-                            children=[
-                                dmc.Title("Hand", order=2),
-                                dmc.RadioGroup(
-                                    [
-                                        dmc.Radio(l, value=k)
-                                        for k, l in [
-                                            ["right", "Rechts"],
-                                            ["left", "Links"],
-                                        ]
-                                    ],
-                                    id="radiogroup-hand",
-                                    value="right",
-                                    label="Hand",
-                                    size="sm",
-                                    mt=10,
-                                ),
-                            ]
-                        ),
+                        dmc.Radio(l, value=k)
+                        for k, l in [
+                            ["right", "Rechts"],
+                            ["left", "Links"],
+                        ]
                     ],
-                    span="auto",
-                ),
+                    id="radiogroup-hand",
+                    value="right",
+                    label="Hand",
+                    size="sm",
+                    mt=10,
+                )
             ]
         ),
         html.Div(id="all_plots", children=plot_sections),
@@ -193,7 +252,7 @@ app.layout = dmc.Container(
 
 @app.server.route("/download/")
 def download_excel():
-    return send_file(common.get_absolute_path("download/measurement_template.xlsx"))
+    return send_file(get_absolute_path("download/measurement_template.xlsx"))
 
 
 @callback(
@@ -202,7 +261,7 @@ def download_excel():
     prevent_initial_call=True,
 )
 def func(n_clicks):
-    return dcc.send_file(common.get_absolute_path("download/measurement_template.xlsx"))
+    return dcc.send_file(get_absolute_path("download/measurement_template.xlsx"))
 
 
 #######################

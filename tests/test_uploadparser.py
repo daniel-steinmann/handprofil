@@ -1,10 +1,10 @@
 import os
 import pytest
 import pandas as pd
-from excelparser import (
-    validate_upload_format,
-    validate_meta_attributes,
+from handprofil.uploadparser import (
     split_metadata_data,
+    validate_meta_attributes,
+    validate_upload_format
 )
 
 
