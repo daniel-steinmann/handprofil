@@ -3,7 +3,7 @@
 ### Imports ######
 ###################
 
-from dash import Dash, html, dcc, callback, Output, Input, State, ALL
+from dash import Dash, html, dcc, callback, Output, Input, State, ALL, MATCH
 import pandas as pd
 import dash_mantine_components as dmc
 import os
@@ -291,14 +291,14 @@ app.layout = dmc.Container(
 
 
 @callback(
-    Output('store', 'data'),
+    Output('store', 'data', allow_duplicate=True),
     # Workaround for https://github.com/plotly/dash-core-components/issues/816
     Output('upload-data', 'contents'),
     Input('upload-data', 'contents'),
     State('upload-data', 'filename'),
     State('upload-data', 'last_modified'),
     State('store', 'data'),
-    prevent_initial_call=True
+    prevent_initial_call=True,
 )
 def upload_files_to_store(list_of_contents, list_of_names, list_of_dates, store_state):
     if list_of_contents is None:
@@ -319,7 +319,7 @@ def upload_files_to_store(list_of_contents, list_of_names, list_of_dates, store_
 @callback(
     Output('upload-debug-container', 'children'),
     Input('store', 'data'),
-    prevent_initial_call=True
+    prevent_initial_call=True,
 )
 def process_uploaded(data: dict):
     return [dmc.Container([
@@ -328,17 +328,25 @@ def process_uploaded(data: dict):
             DashIconify(icon="mdi:trash", width=20),
             size="lg",
             variant="filled",
-            id={"type": "delete-file-button", "index": {id}},
+            id={"type": "delete-file-button", "index": id},
             n_clicks=0,
             mb=10,
         )]) for id, value in data.items()]
 
 
 @callback(
-    Input({"type": "delete-file-button", "index": ALL}, "n_clicks")
+    Output('store', 'data', allow_duplicate=True),
+    Input({"type": "delete-file-button", "index": ALL}, "n_clicks"),
+    State({"type": "delete-file-button", "index": ALL}, "id"),
+    State('store', 'data'),
+    prevent_initial_call=True,
 )
-def delete_file_from_store():
-    return True
+def delete_file_from_store(n_clicks, id: dict, data: dict):
+    for i, clicks in enumerate(n_clicks):
+        if clicks > 0:
+            del data[id[i]['index']]
+            return data
+    return data
 
 
 @callback(
