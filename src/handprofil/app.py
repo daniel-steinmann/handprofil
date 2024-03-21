@@ -509,7 +509,7 @@ def create_plots(
     for file_id, file in enumerate(plot_data_store):
         file = file.set_index('id')
         file.loc[:, "file_id"] = file_id
-        for section_id, section in enumerate(static_store['section_config']):
+        for section_id, section in enumerate(section_config):
             for section_order, index in enumerate(section['index_order']):
                 if index in file.index:
                     file.loc[index, "section_id"] = section_id
@@ -519,10 +519,15 @@ def create_plots(
     # bring to final flat form
     plot_input = pd.concat(all_files, axis=0)\
         .reset_index()\
-        .melt(id_vars=["id", "device", "description", "unit", "file_id", "section_id", "section_order"], var_name="hand")\
-        .to_csv("plot_input.csv")
+        .melt(id_vars=["id", "device", "description", "unit", "file_id", "section_id", "section_order"], var_name="hand")
 
-    return [html.Div("Hello World")]
+    all_plots_children = []
+    for section_id, section in enumerate(section_config):
+        figure = frontend.return_section_figure(plot_input, section_id)
+        child = frontend.wrap_figure_in_graph(section["title"], figure)
+        all_plots_children.append(child)
+
+    return all_plots_children
 
 
 @callback(

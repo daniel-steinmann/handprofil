@@ -191,9 +191,9 @@ def test_compute_plot_input_data():
         pd.DataFrame.from_dict(item) for item in results
     ]
 
-    assert dataframes[0].loc[0, "right"] == 14
-    assert dataframes[0].loc[0, "left"] == 12
-    assert dataframes[1].loc[0, "right"] == 15
+    assert dataframes[0].loc[1, "right"] == 14
+    assert dataframes[0].loc[1, "left"] == 12
+    assert dataframes[1].loc[1, "right"] == 15
     assert ("left" not in dataframes[1].columns) == True
 
 
@@ -275,6 +275,7 @@ def test_create_plots():
     }]
 
     # Act
-    create_plots(plot_data_store, static_store)
+    result = create_plots(plot_data_store, static_store)
 
     # Assert
+    x = result

@@ -18,22 +18,26 @@ def __return_ticktext(plot_df):
     )
 
 
-def __return_trace(df: pd.DataFrame, color="black"):
+def __return_trace(df: pd.DataFrame, color, linestyle, symbol):
     return go.Scatter(
-        x=df.value,
-        y=df.index,
-        marker=dict(size=16, color=color),
+        x=pd.Series(df.value),
+        y=pd.Series(df.section_order),
+        marker=dict(size=16, color=color, symbol=symbol),
         mode="lines+markers",
-        line=dict(dash="solid", width=2, color=color),
+        line=go.scatter.Line(color=color, dash=linestyle, width=2),
         connectgaps=True,
     )
 
 
-def return_section_figure(df: pd.DataFrame):
+def return_section_figure(df: pd.DataFrame, section_id: int):
+
+    df_per_section = df[df["section_id"] == section_id]
+
     labelmargin = 200
 
     fig = px.scatter()
-    ticktext = __return_ticktext(df)
+    ticktext = __return_ticktext(
+        df_per_section[["id", "description", "unit"]].drop_duplicates())
 
     fig.update_layout(
         width=1000,
@@ -77,7 +81,7 @@ def return_section_figure(df: pd.DataFrame):
         margin=dict(autoexpand=False, l=labelmargin, r=0, t=0, b=50),
         showlegend=False,
         paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)"
     )
 
     fig.add_shape(
@@ -104,7 +108,15 @@ def return_section_figure(df: pd.DataFrame):
         )
     )
 
-    fig.add_trace(__return_trace(df))
+    for file_id in df_per_section["file_id"].values:
+        for hand in df_per_section["hand"].values:
+            color = px.colors.qualitative.G10[file_id]
+            linestyle = "solid" if hand == "right" else "dash"
+            symbol = "circle" if hand == "right" else "diamond-open"
+
+            in_df = df_per_section.set_index(
+                ["file_id", "hand"]).sort_index().loc[(file_id, hand)]
+            fig.add_trace(__return_trace(in_df, color, linestyle, symbol))
 
     return fig
 
