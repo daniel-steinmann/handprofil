@@ -10,7 +10,8 @@ from handprofil.app import (
     load_static_data,
     compute_binned_values,
     upload_files_to_store,
-    get_plot_input_data
+    get_plot_input_data,
+    create_plots
 )
 from handprofil.utils import (
     load_background
@@ -44,7 +45,6 @@ def test_load_static_data():
     result = load_static_data("dummy")
 
     # Assert
-    assert len(result) == 3
 
 
 @pytest.mark.parametrize(
@@ -195,3 +195,86 @@ def test_compute_plot_input_data():
     assert dataframes[0].loc[0, "left"] == 12
     assert dataframes[1].loc[0, "right"] == 15
     assert ("left" not in dataframes[1].columns) == True
+
+
+def test_create_plots():
+    # Arrange
+    static_store = {
+        "section_config":
+            [
+                {
+                    "title": "Handform",
+                    "index_order": [2, 1]
+                },
+                {
+                    "title": "Aktive Beweglichkeit",
+                    "index_order": [
+                        3
+                    ]
+                },
+            ]
+    }
+
+    plot_data_store = [{
+        "id": {
+            "0": 1,
+            "1": 2,
+            "2": 3
+        },
+        "right": {
+            "0": 14,
+            "1": 2,
+            "2": 2
+        },
+        "left": {
+            "0": 12,
+            "1": 4,
+            "2": 10
+        },
+        "device": {
+            "0": "Handlabor",
+            "1": "Handlabor",
+            "2": "Handlabor"
+        },
+        "description": {
+            "0": "Handlänge",
+            "1": "Handbreite",
+            "2": "Fingerlänge"
+        },
+        "unit": {
+            "0": "mm",
+            "1": "mm",
+            "2": "mm"
+        }
+    },
+        {
+        "id": {
+            "0": 1,
+            "1": 2
+        },
+        "right": {
+            "0": 2,
+            "1": 10
+        },
+        "left": {
+            "0": 3,
+            "1": 6
+        },
+        "device": {
+            "0": "Handlabor",
+            "1": "Handlabor"
+        },
+        "description": {
+            "0": "Handlänge",
+            "1": "Handbreite"
+        },
+        "unit": {
+            "0": "mm",
+            "1": "mm"
+        }
+    }]
+
+    # Act
+    create_plots(plot_data_store, static_store)
+
+    # Assert

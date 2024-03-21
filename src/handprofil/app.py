@@ -4,6 +4,7 @@
 ###################
 
 from io import StringIO
+import json
 import frontend
 import utils
 import uploadparser
@@ -359,10 +360,17 @@ def load_static_data(trigger):
         }
     ).to_dict()
 
+    with open(
+        utils.get_absolute_path(
+            "src/handprofil/config/plot_sections.json"), "r"
+    ) as file:
+        section_config = json.load(file)
+
     return {
         "measure_labels": measure_labels,
         "info_labels": info_labels,
-        "background_data": background
+        "background_data": background,
+        "section_config": section_config
     }
 
 
@@ -442,7 +450,7 @@ def compute_binned_values(
 
 
 @callback(
-    Output("all-plots", 'data'),
+    Output("plot-data-store", 'data'),
     Input('decile-data-store', 'data'),
     Input({"type": 'chips-hand', "index": ALL}, 'value'),
     Input({"type": 'chips-hand', "index": ALL}, 'id'),
@@ -468,6 +476,7 @@ def get_plot_input_data(
         # Only keep specified hand values
         plot = static_store['measure_labels'].set_index('id')
 
+        # Add labels and flatten
         file = file.unstack()\
             .loc[:, ("value", hands_shown_values[i])]\
             .droplevel(0, axis=1)\
@@ -478,6 +487,37 @@ def get_plot_input_data(
         plot_files.append(file)
 
     return plot_files
+
+
+@callback(
+    Output("all-plots", 'children'),
+    Input('plot-data-store', 'data'),
+    State('static-store', 'data'),
+    prevent_initial_call=True
+)
+def create_plots(
+    plot_data_store: dict,
+    static_store: dict,
+):
+    plot_data_store = [
+        pd.DataFrame.from_dict(item) for item in plot_data_store
+    ]
+
+    section_config = static_store['section_config']
+
+    all_files = []
+    for file_id, file in enumerate(plot_data_store):
+        file = file.set_index('id')
+        file.loc[:, "file_id"] = file_id
+        for section_id, section in enumerate(static_store['section_config']):
+            for section_order, index in enumerate(section['index_order']):
+                if index in file.index:
+                    file.loc[index, "section_id"] = section_id
+                    file.loc[index, "section_order"] = section_order
+        all_files.append(file)
+    plot_input = pd.concat(all_files, axis=0)
+
+    return [html.Div("Hello World")]
 
 
 @callback(
