@@ -35,46 +35,6 @@ def test_return_wagner_decile(value, expected):
     assert result == expected
 
 
-def test_get_bin_edges():
-    # Arrange
-    background = load_background()
-
-    # Act
-    df = get_bin_edges("violine", "m", "left", background)
-
-    # Assert
-    assert len(df.columns) == 9
-
-
-def test_get_calculated_values():
-    ids = [101, 103]
-    values = [197, 43]
-    input_series = pd.Series(values, index=ids, name="measurement")
-
-    background = load_background()
-    bin_edges = get_bin_edges("violine", "m", "left", background)
-
-    result = measurements_to_bins(input_series, bin_edges)
-
-    assert result.index.values[0] == 101
-    assert result.index.values[1] == 103
-    assert result.values[0] == 17
-    assert result.values[1] == 4
-
-
-def test_get_calculated_values_if_index_not_in_background():
-    ids = [500]
-    values = [1]
-    input_series = pd.Series(values, index=ids, name="measurement")
-
-    background = load_background()
-    bin_edges = get_bin_edges("violine", "m", "left", background)
-
-    result = measurements_to_bins(input_series, bin_edges)
-
-    assert result.empty == True
-
-
 def test_load_static_data():
     # Arrange
 

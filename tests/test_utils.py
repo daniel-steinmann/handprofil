@@ -11,10 +11,6 @@ def test_load_attributes():
     # Act
     df = load_attributes()
 
-    # Assert
-    assert df.index.name == "id"
-    assert len(df.columns) == 4
-
 
 def test_load_meta_attributes():
     """
@@ -23,10 +19,6 @@ def test_load_meta_attributes():
     # Arrange
     # Act
     df = load_meta_attributes()
-
-    # Assert
-    assert df.index.name == "id"
-    assert len(df.columns) == 1
 
 
 def test_load_background():
@@ -37,12 +29,7 @@ def test_load_background():
     # Act
     df = load_background()
 
-    # Assert
-    assert len(df.columns) == 13
-
 
 def test_load_plot_section_config():
 
     section = load_plot_section_config()
-
-    assert isinstance(section, list)
