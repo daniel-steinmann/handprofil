@@ -33,6 +33,6 @@ def test_validate_meta_attributes(filename, expected):
     # Assert
     pd.DataFrame.from_dict({})
     assert len(data) == 2
-    first_content = list(data.values())[0]
+    first_content = data[0]
     info = pd.DataFrame.from_dict(first_content['info'])
     data = pd.DataFrame.from_dict(first_content['data'])

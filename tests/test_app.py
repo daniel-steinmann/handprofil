@@ -1,4 +1,5 @@
 import base64
+from io import StringIO
 import os
 import pytest
 import pandas as pd
@@ -57,8 +58,8 @@ def test_compute_plot_input_from_store(
     instrument = "violine"
 
     # There is no background for id=8
-    upload_store = {
-        "key1": {
+    upload_store = [
+        {
             "data": {
                 "id": {0: 1, 1: 8},
                 "device": {0: "dummy", 1: "dummy"},
@@ -67,7 +68,7 @@ def test_compute_plot_input_from_store(
                 "right": {0: 181.0, 1: 95.0}
             }
         },
-        "key2": {
+        {
             "data": {
                 "id": {0: 1, 1: 8},
                 "device": {0: "dummy", 1: "dummy"},
@@ -76,7 +77,7 @@ def test_compute_plot_input_from_store(
                 "right": {0: 181.0, 1: 95.0}
             }
         }
-    }
+    ]
 
     static_store = {
         "background_data": {
@@ -101,15 +102,15 @@ def test_compute_plot_input_from_store(
     )
 
     # Assert
-    result_dfs = {
-        key: pd.DataFrame.from_dict(df) for key, df in result.items()
-    }
+    result_dfs = [
+        pd.read_json(StringIO(df)).set_index(["id", "hand"]) for df in result
+    ]
 
-    assert result_dfs["key1"].loc[(1, "left")].value == 3
+    assert result_dfs[0].loc[(1, "left")].value == 3
 
     if checkbox_background_hand:
-        assert result_dfs["key1"].loc[(1, "right")].value == 4
+        assert result_dfs[0].loc[(1, "right")].value == 4
     else:
         # Right hand value should not be part of result
         # if values were not imputed
-        assert ((1, "right") in list(result_dfs["key1"].index)) == False
+        assert ((1, "right") in list(result_dfs[0].index)) == False

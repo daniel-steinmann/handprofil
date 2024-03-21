@@ -299,7 +299,7 @@ app.layout = dmc.Container(
                     ])
             ]
         ),
-        dmc.Container(id="all_plots", style=container_style,
+        dmc.Container(id="all-plots", style=container_style,
                       children=plot_sections)
     ],
     fluid=True,
@@ -359,35 +359,6 @@ def load_static_data(trigger):
 
 
 @callback(
-    Output('upload-store', 'data', allow_duplicate=True),
-    # Workaround for https://github.com/plotly/dash-core-components/issues/816
-    Output('upload-data', 'contents'),
-    Output('upload-error-messages', 'children'),
-    Input('upload-data', 'contents'),
-    State('upload-store', 'data'),
-    prevent_initial_call=True,
-)
-def upload_files_to_store(list_of_contents, store_state):
-    if list_of_contents is None:
-        raise PreventUpdate
-
-    results = [
-        uploadparser.parse_contents(c) for c in list_of_contents
-    ]
-
-    new_items = {
-        str(uuid.uuid4()): data for result, data in results if result
-    }
-
-    errors = [
-        html.Div(f"Upload failed with {e}") for result, e in results if not result
-    ]
-
-    export = store_state | new_items if store_state else new_items
-    return export, None, errors
-
-
-@callback(
     Output('plot-data-store', 'data'),
     Input('upload-store', 'data'),
     Input('radiogroup-sex', 'value'),
@@ -399,7 +370,7 @@ def upload_files_to_store(list_of_contents, store_state):
     prevent_initial_call=True,
 )
 def compute_plot_input_from_store(
-    upload_store: dict,
+    upload_store: list,
     sex: str,
     instrument: str,
     checkbox_background_hand: bool,
@@ -429,19 +400,19 @@ def compute_plot_input_from_store(
     background_data = background_data.loc[instrument, sex]
     background_data = background_data\
         .stack()\
-        .reorder_levels(["id", "hand", "bin_edge"])
+        .reorder_levels(["id", "hand", "bin_edge"])\
+        .sort_index()
 
     # Parse uploaded data
-    uploaded_data = {
-        key:
+    uploaded_data = [
         pd.DataFrame.from_dict(item["data"]).astype({
             "id": np.int64,
             "left": np.float64,
             "right": np.float64
-        }) for key, item in upload_store.items()}
+        }) for item in upload_store]
 
-    binned_data = {}
-    for key, data in uploaded_data.items():
+    binned_data = []
+    for data in uploaded_data:
         # Drop NaN values
         # Keep as dataframe to allow index access in "apply"
         data = data\
@@ -460,24 +431,25 @@ def compute_plot_input_from_store(
             ), axis=1
         )
 
-        binned_data[key] = data.to_dict()
+        # Reset index for json serialization
+        binned_data.append(data.reset_index().to_json())
 
     return binned_data
 
 
-@callback(
-    Output("all-plots", "children"),
-    Input('checkbox-show-all-measures', 'checked'),
-)
+# @callback(
+#     Output("all-plots", "children"),
+#     Input('checkbox-show-all-measures', 'checked'),
+# )
 # def get_plots()
 @callback(
     Output('upload-debug-container', 'children'),
     Input('upload-store', 'data'),
     prevent_initial_call=True,
 )
-def display_upload_store_content(data: dict):
+def display_upload_store_content(data: list):
     return [dmc.Container([
-        html.Div(f"File-UUID: {id} "),
+        html.Div(f"File-Index: {id} "),
         dmc.ActionIcon(
             DashIconify(icon="mdi:trash", width=20),
             size="lg",
@@ -485,7 +457,7 @@ def display_upload_store_content(data: dict):
             id={"type": "delete-file-button", "index": id},
             n_clicks=0,
             mb=10,
-        )]) for id, value in data.items()]
+        )]) for id, value in enumerate(data)]
 
 
 @callback(
@@ -501,6 +473,35 @@ def delete_file_from_store(n_clicks, id: dict, data: dict):
             data.pop(id[i]['index'])
             return data
     return data
+
+
+@callback(
+    Output('upload-store', 'data', allow_duplicate=True),
+    # Workaround for https://github.com/plotly/dash-core-components/issues/816
+    Output('upload-data', 'contents'),
+    Output('upload-error-messages', 'children'),
+    Input('upload-data', 'contents'),
+    State('upload-store', 'data'),
+    prevent_initial_call=True,
+)
+def upload_files_to_store(list_of_contents, store_state):
+    if list_of_contents is None:
+        raise PreventUpdate
+
+    results = [
+        uploadparser.parse_contents(c) for c in list_of_contents
+    ]
+
+    new_items = [
+        data for result, data in results if result
+    ]
+
+    errors = [
+        html.Div(f"Upload failed with {e}") for result, e in results if not result
+    ]
+
+    export = store_state + new_items if store_state else new_items
+    return export, None, errors
 
 
 @callback(
