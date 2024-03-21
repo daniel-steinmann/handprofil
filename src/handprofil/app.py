@@ -3,6 +3,9 @@
 ### Imports ######
 ###################
 
+import frontend
+import utils
+import uploadparser
 from dash import Dash, html, dcc, callback, Output, Input, State, ALL, MATCH
 import numpy as np
 import pandas as pd
@@ -12,10 +15,8 @@ from flask import send_file
 from dash.exceptions import PreventUpdate
 import uuid
 from dash_iconify import DashIconify
+import plotly.express as px
 
-import uploadparser
-import utils
-import frontend
 
 ###################
 # Constants #
@@ -448,7 +449,7 @@ def compute_plot_input_from_store(
     prevent_initial_call=True,
 )
 def display_upload_store_content(data: list):
-    return [dmc.Container([
+    return [dmc.Container(children=[
         html.Div(f"File-Index: {id} "),
         dmc.ActionIcon(
             DashIconify(icon="mdi:trash", width=20),
@@ -457,7 +458,9 @@ def display_upload_store_content(data: list):
             id={"type": "delete-file-button", "index": id},
             n_clicks=0,
             mb=10,
-        )]) for id, value in enumerate(data)]
+        )], style={
+            "color": px.colors.qualitative.G10[id]
+    }) for id, value in enumerate(data)]
 
 
 @callback(
