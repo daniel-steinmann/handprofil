@@ -8,8 +8,9 @@ from handprofil.app import (
     get_bin_edges,
     measurements_to_bins,
     load_static_data,
-    compute_plot_input_from_store,
-    upload_files_to_store
+    compute_binned_values,
+    upload_files_to_store,
+    get_plot_input_data
 )
 from handprofil.utils import (
     load_background
@@ -50,7 +51,7 @@ def test_load_static_data():
     "checkbox_background_hand",
     [(True), (False)],
 )
-def test_compute_plot_input_from_store(
+def test_compute_binned_values(
     checkbox_background_hand
 ):
     # background_choice
@@ -91,7 +92,7 @@ def test_compute_plot_input_from_store(
     }
 
     # Act
-    result = compute_plot_input_from_store(
+    result = compute_binned_values(
         upload_store,
         sex,
         instrument,
@@ -114,3 +115,83 @@ def test_compute_plot_input_from_store(
         # Right hand value should not be part of result
         # if values were not imputed
         assert ((1, "right") in list(result_dfs[0].index)) == False
+
+
+def test_compute_plot_input_data():
+    # Arrange
+    decile_data_store = [
+        {
+            "id": {
+                "0": 1,
+                "1": 1,
+            },
+            "hand": {
+                "0": "left",
+                "1": "right",
+            },
+            "value": {
+                "0": 12,
+                "1": 14,
+            }
+        },
+        {
+            "id": {
+                "0": 1,
+                "1": 1,
+            },
+            "hand": {
+                "0": "left",
+                "1": "right",
+            },
+            "value": {
+                "0": 7,
+                "1": 15,
+            }
+        }
+    ]
+    decile_data_store = [
+        pd.DataFrame.from_dict(item).to_json() for item in decile_data_store
+    ]
+
+    static_store = {
+        "measure_labels": {
+            "id": {
+                "0": 1,
+                "1": 2,
+                "2": 3,
+            },
+            "device": {
+                "0": "Handlabor",
+                "1": "Handlabor",
+                "2": "Handlabor",
+            },
+            "description": {
+                "0": "Handlänge",
+                "1": "Handbreite",
+                "2": "Handindex 2:1",
+            },
+            "unit": {
+                "0": "mm",
+                "1": "mm",
+                "2": "keine",
+            }
+        }
+    }
+
+    hands_shown_values = [["right", "left"], ["right"]]
+    hands_shown_ids = [1, 2]
+
+    # Act
+    results = get_plot_input_data(
+        decile_data_store, hands_shown_values, hands_shown_ids, static_store
+    )
+
+    # Assert
+    dataframes = [
+        pd.DataFrame.from_dict(item) for item in results
+    ]
+
+    assert dataframes[0].loc[0, "right"] == 14
+    assert dataframes[0].loc[0, "left"] == 12
+    assert dataframes[1].loc[0, "right"] == 15
+    assert ("left" not in dataframes[1].columns) == True

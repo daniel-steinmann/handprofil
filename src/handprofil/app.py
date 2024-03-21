@@ -3,6 +3,7 @@
 ### Imports ######
 ###################
 
+from io import StringIO
 import frontend
 import utils
 import uploadparser
@@ -55,6 +56,11 @@ sex_data = [
     ["m", "Männlich"],
     ["w", "Weiblich"],
 ]
+
+hand_data = {
+    "labels": ["Links", "Rechts"],
+    "values": ["left", "right"],
+}
 
 ###################
 ### Styles ########
@@ -197,6 +203,7 @@ app.layout = dmc.Container(
     [
         # Stores
         dcc.Store(id='upload-store', storage_type='memory'),
+        dcc.Store(id='decile-data-store', storage_type='memory'),
         dcc.Store(id='plot-data-store', storage_type='memory'),
         dcc.Store(id='static-store', storage_type='session'),
         html.Div(children=[], id='static-store-initializer'),
@@ -360,23 +367,19 @@ def load_static_data(trigger):
 
 
 @callback(
-    Output('plot-data-store', 'data'),
+    Output('decile-data-store', 'data'),
     Input('upload-store', 'data'),
     Input('radiogroup-sex', 'value'),
     Input('select-instrument', 'value'),
     Input('checkbox-background-hand', 'checked'),
-    # Input({"type": 'chips-hand', "index": ALL}, 'value'),
-    # Input({"type": 'chips-hand', "index": ALL}, 'id'),
     State('static-store', 'data'),
     prevent_initial_call=True,
 )
-def compute_plot_input_from_store(
+def compute_binned_values(
     upload_store: list,
     sex: str,
     instrument: str,
     checkbox_background_hand: bool,
-    # hands_shown_values: list,
-    # hands_shown_ids: list,
     static_store: dict
 ):
 
@@ -438,11 +441,45 @@ def compute_plot_input_from_store(
     return binned_data
 
 
-# @callback(
-#     Output("all-plots", "children"),
-#     Input('checkbox-show-all-measures', 'checked'),
-# )
-# def get_plots()
+@callback(
+    Output("all-plots", 'data'),
+    Input('decile-data-store', 'data'),
+    Input({"type": 'chips-hand', "index": ALL}, 'value'),
+    Input({"type": 'chips-hand', "index": ALL}, 'id'),
+    State('static-store', 'data'),
+    prevent_initial_call=True
+)
+def get_plot_input_data(
+    decile_data_store: str,
+    hands_shown_values: list,
+    hands_shown_ids: list,
+    static_store: dict
+):
+    decile_data_store = [
+        pd.read_json(StringIO(item)).set_index(["id", "hand"]) for item in decile_data_store
+    ]
+
+    static_store = {
+        key: pd.DataFrame.from_dict(item) for key, item in static_store.items()
+    }
+
+    plot_files = []
+    for i, file in enumerate(decile_data_store):
+        # Only keep specified hand values
+        plot = static_store['measure_labels'].set_index('id')
+
+        file = file.unstack()\
+            .loc[:, ("value", hands_shown_values[i])]\
+            .droplevel(0, axis=1)\
+            .merge(plot, how='left', left_index=True, right_index=True)\
+            .reset_index()\
+            .to_dict()
+
+        plot_files.append(file)
+
+    return plot_files
+
+
 @callback(
     Output('upload-debug-container', 'children'),
     Input('upload-store', 'data'),
@@ -458,9 +495,21 @@ def display_upload_store_content(data: list):
             id={"type": "delete-file-button", "index": id},
             n_clicks=0,
             mb=10,
-        )], style={
-            "color": px.colors.qualitative.G10[id]
-    }) for id, value in enumerate(data)]
+        ), dmc.ChipGroup(
+            [
+                dmc.Chip(
+                    x,
+                    value=x,
+                    variant="outline",
+                )
+                for x in hand_data["labels"]
+            ],
+            id={"type": "chips-hand", "index": id},
+            value=hand_data["values"],
+            multiple=True,
+            mt=10,
+        )], style={"color": px.colors.qualitative.G10[id]})
+        for id, value in enumerate(data)]
 
 
 @callback(

@@ -11,11 +11,6 @@ from dash_iconify import DashIconify
 # Constants #
 ###################
 
-hand_data = {
-    "labels": ["Links", "Rechts"],
-    "values": ["left", "right"],
-}
-
 
 def __return_ticktext(plot_df):
     return plot_df.apply(
@@ -157,21 +152,8 @@ def return_subject_grid(metadata: pd.Series, switch_id: str):
         ),
         dmc.Container(
             children=[
-                dmc.Text("Anzeigen"),
-                dmc.ChipGroup(
-                    [
-                        dmc.Chip(
-                            x,
-                            value=x,
-                            variant="outline",
-                        )
-                        for x in hand_data["labels"]
-                    ],
-                    id={"type": "chips-hand", "index": "TODO"},
-                    value=hand_data["values"],
-                    multiple=True,
-                    mt=10,
-                )]),
+                dmc.Text("Anzeigen")
+            ]),
         dmc.Container(children=[dmc.ActionIcon(
             DashIconify(icon="mdi:trash", width=20),
             size="lg",
