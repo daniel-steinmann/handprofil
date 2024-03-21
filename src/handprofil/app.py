@@ -552,7 +552,7 @@ def display_upload_store_content(data: list):
                     value=x,
                     variant="outline",
                 )
-                for x in hand_data["labels"]
+                for x in hand_data["values"]
             ],
             id={"type": "chips-hand", "index": id},
             value=hand_data["values"],

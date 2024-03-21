@@ -37,7 +37,7 @@ def return_section_figure(df: pd.DataFrame, section_id: int):
 
     fig = px.scatter()
     ticktext = __return_ticktext(
-        df_per_section[["id", "description", "unit"]].drop_duplicates())
+        df_per_section[["id", "description", "unit"]].drop_duplicates().reset_index())
 
     fig.update_layout(
         width=1000,
@@ -108,14 +108,18 @@ def return_section_figure(df: pd.DataFrame, section_id: int):
         )
     )
 
-    for file_id in df_per_section["file_id"].values:
-        for hand in df_per_section["hand"].values:
+    for file_id in df_per_section["file_id"].unique():
+        for hand in df_per_section["hand"].unique():
             color = px.colors.qualitative.G10[file_id]
             linestyle = "solid" if hand == "right" else "dash"
             symbol = "circle" if hand == "right" else "diamond-open"
 
             in_df = df_per_section.set_index(
-                ["file_id", "hand"]).sort_index().loc[(file_id, hand)]
+                ["file_id", "hand"])\
+                .sort_index()\
+                .loc[(file_id, hand)]\
+                .sort_values(by="section_order")
+
             fig.add_trace(__return_trace(in_df, color, linestyle, symbol))
 
     return fig
