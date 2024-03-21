@@ -10,3 +10,4 @@ pyarrow
 gunicorn
 pandera
 dash-iconify
+nbformat
