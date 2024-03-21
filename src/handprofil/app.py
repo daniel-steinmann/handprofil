@@ -4,6 +4,7 @@
 ###################
 
 from dash import Dash, html, dcc, callback, Output, Input, State, ALL, MATCH
+import numpy as np
 import pandas as pd
 import dash_mantine_components as dmc
 import os
@@ -158,38 +159,47 @@ server = app.server
 # Data Processing #
 ###################
 
-attributes = utils.load_attributes()
-background = utils.load_background()
-section_config = utils.load_plot_section_config()
+# attributes = utils.load_attributes()
+# background = utils.load_background()
+# section_config = utils.load_plot_section_config()
 
-input_df = pd.read_excel(utils.get_absolute_path(
-    "tests/data/input_successful.xlsx"))
+# input_df = pd.read_excel(utils.get_absolute_path(
+#     "tests/data/input_successful.xlsx"))
 
-validation_result, alert = uploadparser.validate_upload(input_df)
-metadata, data_df = uploadparser.split_metadata_data(input_df)
+# validation_result, alert = uploadparser.validate_upload(input_df)
+# metadata, data_df = uploadparser.split_metadata_data(input_df)
 
-bin_edges = get_bin_edges(
-    "gemischt", "m", "right", background)
-binned_measurements = measurements_to_bins(data_df, bin_edges)
+# bin_edges = get_bin_edges(
+#     "gemischt", "m", "right", background)
+# binned_measurements = measurements_to_bins(data_df, bin_edges)
 
 ####################################
 ### Create Dynamic Plot Elements ###
 ####################################
 
-# Subject Grid
-subject_grid = frontend.return_subject_grid(metadata, "switch-subject")
+# # Subject Grid
+# subject_grid = frontend.return_subject_grid(metadata, "switch-subject")
+subject_grid = []
 
-# Measurement Plots
-plot_sections = frontend.get_plot_sections(
-    binned_measurements, attributes, section_config)
+# # Measurement Plots
+# plot_sections = frontend.get_plot_sections(
+#     binned_measurements, attributes, section_config)
+plot_sections = []
 
 #######################
 ####### Layout ########
 #######################
 
+
 # App layout
 app.layout = dmc.Container(
     [
+        # Stores
+        dcc.Store(id='upload-store', storage_type='memory'),
+        dcc.Store(id='plot-data-store', storage_type='memory'),
+        dcc.Store(id='static-store', storage_type='session'),
+        html.Div(children=[], id='static-store-initializer'),
+        # Layout
         dmc.Header(height=60, children=[dmc.Center(
             dmc.Title("Handlabor", order=1))]),
         dmc.Container(
@@ -237,9 +247,9 @@ app.layout = dmc.Container(
         dmc.Container(
             style=container_style,
             children=[
-                dcc.Store(id='store', storage_type='memory'),
                 dmc.Title(dmc.Text("Uploads Debugger"), order=2),
                 dmc.Container(id="upload-debug-container"),
+                dmc.Container(id="upload-error-messages"),
             ]),
         dmc.Container(
             style=container_style,
@@ -252,6 +262,8 @@ app.layout = dmc.Container(
             style=container_style,
             children=[
                 dmc.Title("Vergleichsgruppe (Hintergrund)", order=2),
+                dmc.Text(
+                    "Es werde nur Metriken angezeigt, für welche Hintergrundsdaten verfügbar sind."),
                 dmc.SimpleGrid(
                     cols=3,
                     children=[
@@ -275,6 +287,14 @@ app.layout = dmc.Container(
                             data=instrument_data,
                             style={"width": 200,
                                    "marginBottom": 10},
+                        ),
+                        dmc.Container(
+                            [
+                                dmc.Checkbox(
+                                    id="checkbox-background-hand", label="Hintergrund bei fehlender Hand durch andere Hand ersetzen.", checked=True),
+                                dmc.Checkbox(
+                                    id="checkbox-show-all-measures", label="Nur Metriken mit vorhandener Messung anzeigen.", checked=False),
+                            ]
                         )
                     ])
             ]
@@ -291,37 +311,171 @@ app.layout = dmc.Container(
 
 
 @callback(
-    Output('store', 'data', allow_duplicate=True),
-    # Workaround for https://github.com/plotly/dash-core-components/issues/816
-    Output('upload-data', 'contents'),
-    Input('upload-data', 'contents'),
-    State('upload-data', 'filename'),
-    State('upload-data', 'last_modified'),
-    State('store', 'data'),
-    prevent_initial_call=True,
+    Output('static-store', 'data'),
+    Input('static-store-initializer', 'children')
 )
-def upload_files_to_store(list_of_contents, list_of_names, list_of_dates, store_state):
-    if list_of_contents is None:
-        raise PreventUpdate
+def load_static_data(trigger):
+    measure_labels = pd.read_csv(
+        utils.get_absolute_path(
+            "src/handprofil/config/attributes.csv"),
+        header=0,
+        dtype={
+            "id": np.int64,
+            "device": str,
+            "description": str,
+            "unit": str
+        }
+    ).to_dict()
 
-    dataframes = [
-        uploadparser.parse_contents(c, n, d) for c, n, d in
-        zip(list_of_contents, list_of_names, list_of_dates)]
+    info_labels = pd.read_csv(
+        utils.get_absolute_path(
+            "src/handprofil/config/meta_attributes.csv"),
+        header=0,
+        dtype={
+            "id": np.int64,
+            "description": str,
+        }
+    ).to_dict()
 
-    new_items = {
-        str(uuid.uuid4()): df.to_dict() for df in dataframes
+    background = pd.read_csv(
+        utils.get_absolute_path(
+            "src/handprofil/config/background.csv"),
+        header=0,
+        dtype={
+            "instrument": str,
+            "sex": str,
+            "hand": str,
+            "id": np.int64,
+            "bin_edge": np.int64,
+            "value": np.float64
+        }
+    ).to_dict()
+
+    return {
+        "measure_labels": measure_labels,
+        "info_labels": info_labels,
+        "background_data": background
     }
-
-    export = store_state | new_items if store_state else new_items
-    return export, None
 
 
 @callback(
-    Output('upload-debug-container', 'children'),
-    Input('store', 'data'),
+    Output('upload-store', 'data', allow_duplicate=True),
+    # Workaround for https://github.com/plotly/dash-core-components/issues/816
+    Output('upload-data', 'contents'),
+    Output('upload-error-messages', 'children'),
+    Input('upload-data', 'contents'),
+    State('upload-store', 'data'),
     prevent_initial_call=True,
 )
-def process_uploaded(data: dict):
+def upload_files_to_store(list_of_contents, store_state):
+    if list_of_contents is None:
+        raise PreventUpdate
+
+    results = [
+        uploadparser.parse_contents(c) for c in list_of_contents
+    ]
+
+    new_items = {
+        str(uuid.uuid4()): data for result, data in results if result
+    }
+
+    errors = [
+        html.Div(f"Upload failed with {e}") for result, e in results if not result
+    ]
+
+    export = store_state | new_items if store_state else new_items
+    return export, None, errors
+
+
+@callback(
+    Output('plot-data-store', 'data'),
+    Input('upload-store', 'data'),
+    Input('radiogroup-sex', 'value'),
+    Input('select-instrument', 'value'),
+    Input('checkbox-background-hand', 'checked'),
+    Input({"type": 'chips-hand', "index": ALL}, 'value'),
+    Input({"type": 'chips-hand', "index": ALL}, 'id'),
+    State('static-store', 'data'),
+    prevent_initial_call=True,
+)
+def compute_plot_input_from_store(
+    upload_store: dict,
+    sex: str,
+    instrument: str,
+    checkbox_background_hand: bool,
+    checkbox_show_all_measures: bool,
+    hands_shown_values: list,
+    hands_shown_ids: list,
+    static_store: dict
+):
+
+    # Background is the same for all
+    background_data = pd.DataFrame.from_dict(static_store["background_data"])\
+        .astype({
+            "instrument": str,
+            "sex": str,
+            "hand": str,
+            "id": np.int64,
+            "bin_edge": np.int64,
+            "value": np.float64
+        })\
+        .set_index(["instrument", "sex"])\
+        .pivot_table(index=["instrument", "sex", "id", "bin_edge"], columns="hand")\
+        .droplevel(level=0, axis=1)
+
+    # Impute left / right hand if selected
+    if checkbox_background_hand:
+        background_data["left"] = background_data["left"].fillna(
+            background_data["right"])
+        background_data["right"] = background_data["right"].fillna(
+            background_data["left"])
+
+    # Filter background and melt
+    background_data = background_data.loc[instrument, sex]
+    background_data = background_data\
+        .melt(ignore_index=False)\
+        .set_index("hand", append=True)\
+        .reorder_levels(["id", "hand", "bin_edge"])
+
+    # Parse uploaded data
+    uploaded_data = {
+        key:
+        pd.DataFrame.from_dict(item["data"]).astype({
+            "id": np.int64,
+            "left": np.float64,
+            "right": np.float64
+        }).set_index(["id"])
+            .loc[:, ["left", "right"]]
+            .melt(ignore_index=False, var_name="hand")
+            .set_index("hand", append=True)
+        for key, item in upload_store.items()}
+
+    # Apply binning
+    for key, data in uploaded_data.items():
+        # Only process IDs where background is available
+        data = data.loc[background_data.index.get_level_values("id")]
+
+        # Apply binning
+        data["value"] = data.apply(
+            lambda row: return_wagner_decile(
+                background_data.loc[row.name, "value"], row["value"]
+            ), axis=1
+        )
+
+    return True
+
+
+@callback(
+    Output("all-plots", "children"),
+    Input('checkbox-show-all-measures', 'checked'),
+)
+# def get_plots()
+@callback(
+    Output('upload-debug-container', 'children'),
+    Input('upload-store', 'data'),
+    prevent_initial_call=True,
+)
+def display_upload_store_content(data: dict):
     return [dmc.Container([
         html.Div(f"File-UUID: {id} "),
         dmc.ActionIcon(
@@ -335,10 +489,10 @@ def process_uploaded(data: dict):
 
 
 @callback(
-    Output('store', 'data', allow_duplicate=True),
+    Output('upload-store', 'data', allow_duplicate=True),
     Input({"type": "delete-file-button", "index": ALL}, "n_clicks"),
     State({"type": "delete-file-button", "index": ALL}, "id"),
-    State('store', 'data'),
+    State('upload-store', 'data'),
     prevent_initial_call=True,
 )
 def delete_file_from_store(n_clicks, id: dict, data: dict):

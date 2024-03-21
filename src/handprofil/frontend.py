@@ -167,7 +167,7 @@ def return_subject_grid(metadata: pd.Series, switch_id: str):
                         )
                         for x in hand_data["labels"]
                     ],
-                    id="chips-values",
+                    id={"type": "chips-hand", "index": "TODO"},
                     value=hand_data["values"],
                     multiple=True,
                     mt=10,

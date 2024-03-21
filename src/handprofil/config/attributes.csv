@@ -1,207 +1,104 @@
-﻿id,device,hand,description,unit
-1,Handlabor,Rechts,Handlänge,mm
-2,Handlabor,Rechts,Handbreite,mm
-3,Handlabor,Rechts,Handindex 2:1," "
-4,Handlabor,Rechts,Handgelenkbreite,mm
-5,Handlabor,Rechts,Handrückenlänge,mm
-6,Handlabor,Rechts,Mittelfingerlänge,mm
-7,Handlabor,Rechts,Handlängenindex 5:6," "
-8,Handlabor,Rechts,Zeigfingerlänge,mm
-12,Handlabor,Rechts,Mittelfingerlänge,mm
-16,Handlabor,Rechts,Ringfingerlänge,mm
-20,Handlabor,Rechts,Kleinfingerlänge,mm
-24,Handlabor,Rechts,Differenz 1-3,mm
-27,Handlabor,Rechts,Differenz 5-3,mm
-28,Handlabor,Rechts,Fingerkuppenbreite,mm
-29,Handlabor,Rechts,Spannweite 1-2,mm
-30,Handlabor,Rechts,Spannweite 1-3,mm
-31,Handlabor,Rechts,Spannweite 1-4,mm
-32,Handlabor,Rechts,Spannweite 1-5,mm
-33,Handlabor,Rechts,Spannweite 2-3,mm
-34,Handlabor,Rechts,Spannweite 3-4,mm
-35,Handlabor,Rechts,Spannweite 4-5,mm
-36,Handlabor,Rechts,Spannweite 2-4,mm
-37,Handlabor,Rechts,Spannweite 3-5,mm
-38,Handlabor,Rechts,Spannweite 2-5,mm
-39,Handlabor,Rechts,Daumenbeugewinkel,Grad
-40,Handlabor,Rechts,Abduktion Handgelenk ulnar,Grad
-41,Handlabor,Rechts,Abduktion Handgelenk radial,Grad
-42,Handlabor,Rechts,Summe Abduktion Handgelenk,Grad
-43,Handlabor,Rechts,Supination,Grad
-44,Handlabor,Rechts,Pronation,Grad
-45,Handlabor,Rechts,Summe Rotation,Grad
-46,Handlabor,Rechts,Supination 500 g,Grad
-47,Handlabor,Rechts,Supination 250 g,Grad
-48,Handlabor,Rechts,Supination 500 g,Grad
-49,Handlabor,Rechts,Supination 750 g,Grad
-50,Handlabor,Rechts,Supination 1000 g,Grad
-51,Handlabor,Rechts,Pronation 500 g,Grad
-52,Handlabor,Rechts,Pronation 250 g,Grad
-53,Handlabor,Rechts,Pronation 500 g,Grad
-54,Handlabor,Rechts,Pronation 750 g,Grad
-55,Handlabor,Rechts,Pronation 1000 g,Grad
-56,Handlabor,Rechts,Summe Rotation 500 g,Grad
-57,Handlabor,Rechts,Summe Rotation 250 g,Grad
-58,Handlabor,Rechts,Summe Rotation 500 g,Grad
-59,Handlabor,Rechts,Summe Rotation 750 g,Grad
-60,Handlabor,Rechts,Summe Rotation 1000 g,Grad
-61,Handlabor,Rechts,Überstreckung 2-5 500 g,Grad
-63,Handlabor,Rechts,Überstreckung 2-5 250 g,Grad
-64,Handlabor,Rechts,Überstreckung 2-5 500 g,Grad
-81,Handlabor,Rechts,Daumenabduktion,Grad
-82,Handlabor,Rechts,Spreizung 1-3,Grad
-83,Handlabor,Rechts,Spreizung 1-4,Grad
-84,Handlabor,Rechts,Spreizung 1-5,Grad
-85,Handlabor,Rechts,Spreizung 2-3,Grad
-86,Handlabor,Rechts,Spreizung 3-4,Grad
-87,Handlabor,Rechts,Spreizung 4-5,Grad
-88,Handlabor,Rechts,Spreizung 2-4,Grad
-89,Handlabor,Rechts,Spreizung 3-5,Grad
-90,Handlabor,Rechts,Spreizung 2-5,Grad
-91,Handlabor,Rechts,Abduktion 2. Finger radial,Grad
-92,Handlabor,Rechts,Abduktion 3. Finger radial,Grad
-93,Handlabor,Rechts,Abduktion 4. Finger radial,Grad
-94,Handlabor,Rechts,Abduktion 2. Finger ulnar,Grad
-95,Handlabor,Rechts,Abduktion 3. Finger ulnar,Grad
-96,Handlabor,Rechts,Abduktion 4. Finger ulnar,Grad
-101,Handlabor,Links,Handlänge,mm
-102,Handlabor,Links,Handbreite,mm
-103,Handlabor,Links,Handindex 2:1," "
-104,Handlabor,Links,Handgelenkbreite,mm
-105,Handlabor,Links,Handrückenlänge,mm
-106,Handlabor,Links,Mittelfingerlänge,mm
-107,Handlabor,Links,Handlängenindex 5:6," "
-108,Handlabor,Links,Zeigfingerlänge,mm
-112,Handlabor,Links,Mittelfingerlänge,mm
-116,Handlabor,Links,Ringfingerlänge,mm
-120,Handlabor,Links,Kleinfingerlänge,mm
-124,Handlabor,Links,Differenz 1-3,mm
-127,Handlabor,Links,Differenz 5-3,mm
-128,Handlabor,Links,Fingerkuppenbreite,mm
-129,Handlabor,Links,Spannweite 1-2,mm
-130,Handlabor,Links,Spannweite 1-3,mm
-131,Handlabor,Links,Spannweite 1-4,mm
-132,Handlabor,Links,Spannweite 1-5,mm
-133,Handlabor,Links,Spannweite 2-3,mm
-134,Handlabor,Links,Spannweite 3-4,mm
-135,Handlabor,Links,Spannweite 4-5,mm
-136,Handlabor,Links,Spannweite 2-4,mm
-137,Handlabor,Links,Spannweite 3-5,mm
-138,Handlabor,Links,Spannweite 2-5,mm
-139,Handlabor,Links,Daumenbeugewinkel,Grad
-140,Handlabor,Links,Abduktion Handgelenk ulnar,Grad
-141,Handlabor,Links,Abduktion Handgelenk radial,Grad
-142,Handlabor,Links,Summe Abduktion Handgelenk,Grad
-143,Handlabor,Links,Supination,Grad
-144,Handlabor,Links,Pronation,Grad
-145,Handlabor,Links,Summe Rotation,Grad
-146,Handlabor,Links,Supination 500 g,Grad
-147,Handlabor,Links,Supination 250 g,Grad
-148,Handlabor,Links,Supination 500 g,Grad
-149,Handlabor,Links,Supination 750 g,Grad
-150,Handlabor,Links,Supination 1000 g,Grad
-151,Handlabor,Links,Pronation 500 g,Grad
-152,Handlabor,Links,Pronation 250 g,Grad
-153,Handlabor,Links,Pronation 500 g,Grad
-154,Handlabor,Links,Pronation 750 g,Grad
-155,Handlabor,Links,Pronation 1000 g,Grad
-156,Handlabor,Links,Summe Rotation 500 g,Grad
-157,Handlabor,Links,Summe Rotation 250 g,Grad
-158,Handlabor,Links,Summe Rotation 500 g,Grad
-159,Handlabor,Links,Summe Rotation 750 g,Grad
-160,Handlabor,Links,Summe Rotation 1000 g,Grad
-161,Handlabor,Links,Überstreckung 2-5 500 g,Grad
-163,Handlabor,Links,Überstreckung 2-5 250 g,Grad
-164,Handlabor,Links,Überstreckung 2-5 500 g,Grad
-181,Handlabor,Links,Daumenabduktion,Grad
-182,Handlabor,Links,Spreizung 1-3,Grad
-183,Handlabor,Links,Spreizung 1-4,Grad
-184,Handlabor,Links,Spreizung 1-5,Grad
-185,Handlabor,Links,Spreizung 2-3,Grad
-186,Handlabor,Links,Spreizung 3-4,Grad
-187,Handlabor,Links,Spreizung 4-5,Grad
-188,Handlabor,Links,Spreizung 2-4,Grad
-189,Handlabor,Links,Spreizung 3-5,Grad
-190,Handlabor,Links,Spreizung 2-5,Grad
-191,Handlabor,Links,Abduktion 2. Finger radial,Grad
-192,Handlabor,Links,Abduktion 3. Finger radial,Grad
-193,Handlabor,Links,Abduktion 4. Finger radial,Grad
-194,Handlabor,Links,Abduktion 2. Finger ulnar,Grad
-195,Handlabor,Links,Abduktion 3. Finger ulnar,Grad
-196,Handlabor,Links,Abduktion 4. Finger ulnar,Grad
-301,Handgelenk,Rechts,Abduktion ulnar 50 Ncm,Grad
-302,Handgelenk,Rechts,Abduktion radial 50 Ncm,Grad
-303,Handgelenk,Rechts,Summe Abduktion 50 Ncm,Grad
-304,Handgelenk,Rechts,Abduktion ulnar 25 Ncm,Grad
-305,Handgelenk,Rechts,Abduktion radial 25 Ncm,Grad
-306,Handgelenk,Rechts,Summe Abduktion 25 Ncm,Grad
-307,Handgelenk,Rechts,Abduktion ulnar 50 Ncm,Grad
-308,Handgelenk,Rechts,Abduktion radial 50 Ncm,Grad
-309,Handgelenk,Rechts,Summe Abduktion 50 Ncm,Grad
-310,Handgelenk,Rechts,"Abduktion ulnar + Extension, 50 Ncm",Grad
-311,Handgelenk,Rechts,"Abduktion radial + Flexion, 50 Ncm",Grad
-312,Handgelenk,Rechts,"Summe Abduktion + Extension / Flexion, 50 Ncm",Grad
-313,Handgelenk,Rechts,"Abduktion ulnar + Extension, 25 Ncm",Grad
-314,Handgelenk,Rechts,"Abduktion radial + Extension, 25 Ncm",Grad
-315,Handgelenk,Rechts,"Summe Abduktion + Extension / Flexion, 25 Ncm",Grad
-316,Handgelenk,Rechts,"Abduktion ulnar + Extension, 50 Ncm",Grad
-317,Handgelenk,Rechts,"Abduktion radial + Flexion, 50 Ncm",Grad
-318,Handgelenk,Rechts,"Summe Abduktion + Extension / Flexion, 50 Ncm",Grad
-319,Handgelenk,Rechts,Extension 50 Ncm,Grad
-320,Handgelenk,Rechts,Flexion 50 Ncm,Grad
-321,Handgelenk,Rechts,"Summe Extension + Flexion, 50 Ncm",Grad
-322,Handgelenk,Rechts,Extension 25 Ncm,Grad
-323,Handgelenk,Rechts,Flexion 25 Ncm,Grad
-324,Handgelenk,Rechts,Summe Extension + Flexion 25 Ncm,Grad
-325,Handgelenk,Rechts,Extension 50 Ncm,Grad
-326,Handgelenk,Rechts,Flexion 50 Ncm,Grad
-327,Handgelenk,Rechts,"Summe Extension + Flexion, 50 Ncm",Grad
-328,Handgelenk,Rechts,"Abduktion ulnar + Flexion, 50 Ncm",Grad
-329,Handgelenk,Rechts,"Abduktion radial + Extension, 50 Ncm",Grad
-330,Handgelenk,Rechts,"Summe Abduktion + Extension / Flexion, 50 Ncm",Grad
-331,Handgelenk,Rechts,"Abduktion ulnar + Flexion, 25 Ncm",Grad
-332,Handgelenk,Rechts,"Abduktion radial + Extension, 25 Ncm",Grad
-333,Handgelenk,Rechts,"Summe Abduktion + Extension / Flexion, 25 Ncm",Grad
-334,Handgelenk,Rechts,"Abduktion ulnar + Flexion, 50 Ncm",Grad
-335,Handgelenk,Rechts,"Abduktion radial + Extension, 50 Ncm",Grad
-336,Handgelenk,Rechts,"Summe Abduktion + Extension / Flexion, 50 Ncm",Grad
-337,Handgelenk,Rechts,Extension aktiv,Grad
-338,Handgelenk,Rechts,Flexion aktiv,Grad
-401,Handgelenk,Links,Abduktion ulnar 50 Ncm,Grad
-402,Handgelenk,Links,Abduktion radial 50 Ncm,Grad
-403,Handgelenk,Links,Summe Abduktion 50 Ncm,Grad
-404,Handgelenk,Links,Abduktion ulnar 25 Ncm,Grad
-405,Handgelenk,Links,Abduktion radial 25 Ncm,Grad
-406,Handgelenk,Links,Summe Abduktion 25 Ncm,Grad
-407,Handgelenk,Links,Abduktion ulnar 50 Ncm,Grad
-408,Handgelenk,Links,Abduktion radial 50 Ncm,Grad
-409,Handgelenk,Links,Summe Abduktion 50 Ncm,Grad
-410,Handgelenk,Links,"Abduktion ulnar + Extension, 50 Ncm",Grad
-411,Handgelenk,Links,"Abduktion radial + Flexion, 50 Ncm",Grad
-412,Handgelenk,Links,"Summe Abduktion + Extension / Flexion, 50 Ncm",Grad
-413,Handgelenk,Links,"Abduktion ulnar + Extension, 25 Ncm",Grad
-414,Handgelenk,Links,"Abduktion radial + Extension, 25 Ncm",Grad
-415,Handgelenk,Links,"Summe Abduktion + Extension / Flexion, 25 Ncm",Grad
-416,Handgelenk,Links,"Abduktion ulnar + Extension, 50 Ncm",Grad
-417,Handgelenk,Links,"Abduktion radial + Flexion, 50 Ncm",Grad
-418,Handgelenk,Links,"Summe Abduktion + Extension / Flexion, 50 Ncm",Grad
-419,Handgelenk,Links,Extension 50 Ncm,Grad
-420,Handgelenk,Links,Flexion 50 Ncm,Grad
-421,Handgelenk,Links,"Summe Extension + Flexion, 50 Ncm",Grad
-422,Handgelenk,Links,Extension 25 Ncm,Grad
-423,Handgelenk,Links,Flexion 25 Ncm,Grad
-424,Handgelenk,Links,Summe Extension + Flexion 25 Ncm,Grad
-425,Handgelenk,Links,Extension 50 Ncm,Grad
-426,Handgelenk,Links,Flexion 50 Ncm,Grad
-427,Handgelenk,Links,"Summe Extension + Flexion, 50 Ncm",Grad
-428,Handgelenk,Links,"Abduktion ulnar + Flexion, 50 Ncm",Grad
-429,Handgelenk,Links,"Abduktion radial + Extension, 50 Ncm",Grad
-430,Handgelenk,Links,"Summe Abduktion + Extension / Flexion, 50 Ncm",Grad
-431,Handgelenk,Links,"Abduktion ulnar + Flexion, 25 Ncm",Grad
-432,Handgelenk,Links,"Abduktion radial + Extension, 25 Ncm",Grad
-433,Handgelenk,Links,"Summe Abduktion + Extension / Flexion, 25 Ncm",Grad
-434,Handgelenk,Links,"Abduktion ulnar + Flexion, 50 Ncm",Grad
-435,Handgelenk,Links,"Abduktion radial + Extension, 50 Ncm",Grad
-436,Handgelenk,Links,"Summe Abduktion + Extension / Flexion, 50 Ncm",Grad
-437,Handgelenk,Links,Extension aktiv,Grad
-438,Handgelenk,Links,Flexion aktiv,Grad
+﻿id,device,description,unit
+1,Handlabor,Handlänge,mm
+2,Handlabor,Handbreite,mm
+3,Handlabor,Handindex 2:1,keine
+4,Handlabor,Handgelenkbreite,mm
+5,Handlabor,Handrückenlänge,mm
+6,Handlabor,Mittelfingerlänge,mm
+7,Handlabor,Handlängenindex 5:6,keine
+8,Handlabor,Zeigfingerlänge,mm
+12,Handlabor,Mittelfingerlänge,mm
+16,Handlabor,Ringfingerlänge,mm
+20,Handlabor,Kleinfingerlänge,mm
+24,Handlabor,Differenz 1-3,mm
+27,Handlabor,Differenz 5-3,mm
+28,Handlabor,Fingerkuppenbreite,mm
+29,Handlabor,Spannweite 1-2,mm
+30,Handlabor,Spannweite 1-3,mm
+31,Handlabor,Spannweite 1-4,mm
+32,Handlabor,Spannweite 1-5,mm
+33,Handlabor,Spannweite 2-3,mm
+34,Handlabor,Spannweite 3-4,mm
+35,Handlabor,Spannweite 4-5,mm
+36,Handlabor,Spannweite 2-4,mm
+37,Handlabor,Spannweite 3-5,mm
+38,Handlabor,Spannweite 2-5,mm
+39,Handlabor,Daumenbeugewinkel,Grad
+40,Handlabor,Abduktion Handgelenk ulnar,Grad
+41,Handlabor,Abduktion Handgelenk radial,Grad
+42,Handlabor,Summe Abduktion Handgelenk,Grad
+43,Handlabor,Supination,Grad
+44,Handlabor,Pronation,Grad
+45,Handlabor,Summe Rotation,Grad
+46,Handlabor,Supination 500 g,Grad
+47,Handlabor,Supination 250 g,Grad
+48,Handlabor,Supination 500 g,Grad
+49,Handlabor,Supination 750 g,Grad
+50,Handlabor,Supination 1000 g,Grad
+51,Handlabor,Pronation 500 g,Grad
+52,Handlabor,Pronation 250 g,Grad
+53,Handlabor,Pronation 500 g,Grad
+54,Handlabor,Pronation 750 g,Grad
+55,Handlabor,Pronation 1000 g,Grad
+56,Handlabor,Summe Rotation 500 g,Grad
+57,Handlabor,Summe Rotation 250 g,Grad
+58,Handlabor,Summe Rotation 500 g,Grad
+59,Handlabor,Summe Rotation 750 g,Grad
+60,Handlabor,Summe Rotation 1000 g,Grad
+61,Handlabor,Überstreckung 2-5 500 g,Grad
+63,Handlabor,Überstreckung 2-5 250 g,Grad
+64,Handlabor,Überstreckung 2-5 500 g,Grad
+81,Handlabor,Daumenabduktion,Grad
+82,Handlabor,Spreizung 1-3,Grad
+83,Handlabor,Spreizung 1-4,Grad
+84,Handlabor,Spreizung 1-5,Grad
+85,Handlabor,Spreizung 2-3,Grad
+86,Handlabor,Spreizung 3-4,Grad
+87,Handlabor,Spreizung 4-5,Grad
+88,Handlabor,Spreizung 2-4,Grad
+89,Handlabor,Spreizung 3-5,Grad
+90,Handlabor,Spreizung 2-5,Grad
+91,Handlabor,Abduktion 2. Finger radial,Grad
+92,Handlabor,Abduktion 3. Finger radial,Grad
+93,Handlabor,Abduktion 4. Finger radial,Grad
+94,Handlabor,Abduktion 2. Finger ulnar,Grad
+95,Handlabor,Abduktion 3. Finger ulnar,Grad
+96,Handlabor,Abduktion 4. Finger ulnar,Grad
+201,Handgelenk,Abduktion ulnar 50 Ncm,Grad
+202,Handgelenk,Abduktion radial 50 Ncm,Grad
+203,Handgelenk,Summe Abduktion 50 Ncm,Grad
+204,Handgelenk,Abduktion ulnar 25 Ncm,Grad
+205,Handgelenk,Abduktion radial 25 Ncm,Grad
+206,Handgelenk,Summe Abduktion 25 Ncm,Grad
+207,Handgelenk,Abduktion ulnar 50 Ncm,Grad
+208,Handgelenk,Abduktion radial 50 Ncm,Grad
+209,Handgelenk,Summe Abduktion 50 Ncm,Grad
+210,Handgelenk,"Abduktion ulnar + Extension, 50 Ncm",Grad
+211,Handgelenk,"Abduktion radial + Flexion, 50 Ncm",Grad
+212,Handgelenk,"Summe Abduktion + Extension / Flexion, 50 Ncm",Grad
+213,Handgelenk,"Abduktion ulnar + Extension, 25 Ncm",Grad
+214,Handgelenk,"Abduktion radial + Extension, 25 Ncm",Grad
+215,Handgelenk,"Summe Abduktion + Extension / Flexion, 25 Ncm",Grad
+216,Handgelenk,"Abduktion ulnar + Extension, 50 Ncm",Grad
+217,Handgelenk,"Abduktion radial + Flexion, 50 Ncm",Grad
+218,Handgelenk,"Summe Abduktion + Extension / Flexion, 50 Ncm",Grad
+219,Handgelenk,Extension 50 Ncm,Grad
+220,Handgelenk,Flexion 50 Ncm,Grad
+221,Handgelenk,"Summe Extension + Flexion, 50 Ncm",Grad
+222,Handgelenk,Extension 25 Ncm,Grad
+223,Handgelenk,Flexion 25 Ncm,Grad
+224,Handgelenk,Summe Extension + Flexion 25 Ncm,Grad
+225,Handgelenk,Extension 50 Ncm,Grad
+226,Handgelenk,Flexion 50 Ncm,Grad
+227,Handgelenk,"Summe Extension + Flexion, 50 Ncm",Grad
+228,Handgelenk,"Abduktion ulnar + Flexion, 50 Ncm",Grad
+229,Handgelenk,"Abduktion radial + Extension, 50 Ncm",Grad
+230,Handgelenk,"Summe Abduktion + Extension / Flexion, 50 Ncm",Grad
+231,Handgelenk,"Abduktion ulnar + Flexion, 25 Ncm",Grad
+232,Handgelenk,"Abduktion radial + Extension, 25 Ncm",Grad
+233,Handgelenk,"Summe Abduktion + Extension / Flexion, 25 Ncm",Grad
+234,Handgelenk,"Abduktion ulnar + Flexion, 50 Ncm",Grad
+235,Handgelenk,"Abduktion radial + Extension, 50 Ncm",Grad
+236,Handgelenk,"Summe Abduktion + Extension / Flexion, 50 Ncm",Grad
+237,Handgelenk,Extension aktiv,Grad
+238,Handgelenk,Flexion aktiv,Grad

@@ -1,9 +1,9 @@
 id,description
-M1,ID
-M2,Datum
-M3,Name
-M4,Vorname
-M5,Geburtsdatum
-M6,Geschlecht
-M7,Händigkeit
-M8,Instrument
+1,ID
+2,Datum
+3,Name
+4,Vorname
+5,Geburtsdatum
+6,Geschlecht
+7,Händigkeit
+8,Instrument
