@@ -481,8 +481,8 @@ def get_plot_input_data(
             .loc[:, ("value", hands_shown_values[i])]\
             .droplevel(0, axis=1)\
             .merge(plot, how='left', left_index=True, right_index=True)\
-            .reset_index()\
-            .to_dict()
+            # .reset_index()\
+        # .to_dict()
 
         plot_files.append(file)
 
@@ -515,7 +515,12 @@ def create_plots(
                     file.loc[index, "section_id"] = section_id
                     file.loc[index, "section_order"] = section_order
         all_files.append(file)
-    plot_input = pd.concat(all_files, axis=0)
+
+    # bring to final flat form
+    plot_input = pd.concat(all_files, axis=0)\
+        .reset_index()\
+        .melt(id_vars=["id", "device", "description", "unit", "file_id", "section_id", "section_order"], var_name="hand")\
+        .to_csv("plot_input.csv")
 
     return [html.Div("Hello World")]
 

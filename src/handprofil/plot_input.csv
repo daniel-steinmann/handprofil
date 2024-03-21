@@ -1,0 +1,11 @@
+,id,device,description,unit,file_id,section_id,section_order,hand,value
+0,1,Handlabor,Handlänge,mm,0,0.0,1.0,right,14
+1,2,Handlabor,Handbreite,mm,0,0.0,0.0,right,2
+2,3,Handlabor,Fingerlänge,mm,0,1.0,0.0,right,2
+3,1,Handlabor,Handlänge,mm,1,0.0,1.0,right,2
+4,2,Handlabor,Handbreite,mm,1,0.0,0.0,right,10
+5,1,Handlabor,Handlänge,mm,0,0.0,1.0,left,12
+6,2,Handlabor,Handbreite,mm,0,0.0,0.0,left,4
+7,3,Handlabor,Fingerlänge,mm,0,1.0,0.0,left,10
+8,1,Handlabor,Handlänge,mm,1,0.0,1.0,left,3
+9,2,Handlabor,Handbreite,mm,1,0.0,0.0,left,6
