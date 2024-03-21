@@ -481,8 +481,8 @@ def get_plot_input_data(
             .loc[:, ("value", hands_shown_values[i])]\
             .droplevel(0, axis=1)\
             .merge(plot, how='left', left_index=True, right_index=True)\
-            # .reset_index()\
-        # .to_dict()
+            .reset_index()\
+            .to_dict()
 
         plot_files.append(file)
 
