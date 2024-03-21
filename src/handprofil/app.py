@@ -128,7 +128,7 @@ def return_wagner_decile(bin_edges: list, value: float) -> int:
     #   1   2   3   4   5     6     7     8     9
     # 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
 
-    assert len(bin_edges) == 9
+    # assert len(bin_edges) == 9
 
     bin = 1
     for i, edge in enumerate(bin_edges):
@@ -393,8 +393,8 @@ def upload_files_to_store(list_of_contents, store_state):
     Input('radiogroup-sex', 'value'),
     Input('select-instrument', 'value'),
     Input('checkbox-background-hand', 'checked'),
-    Input({"type": 'chips-hand', "index": ALL}, 'value'),
-    Input({"type": 'chips-hand', "index": ALL}, 'id'),
+    # Input({"type": 'chips-hand', "index": ALL}, 'value'),
+    # Input({"type": 'chips-hand', "index": ALL}, 'id'),
     State('static-store', 'data'),
     prevent_initial_call=True,
 )
@@ -403,9 +403,8 @@ def compute_plot_input_from_store(
     sex: str,
     instrument: str,
     checkbox_background_hand: bool,
-    checkbox_show_all_measures: bool,
-    hands_shown_values: list,
-    hands_shown_ids: list,
+    # hands_shown_values: list,
+    # hands_shown_ids: list,
     static_store: dict
 ):
 
@@ -419,22 +418,17 @@ def compute_plot_input_from_store(
             "bin_edge": np.int64,
             "value": np.float64
         })\
-        .set_index(["instrument", "sex"])\
-        .pivot_table(index=["instrument", "sex", "id", "bin_edge"], columns="hand")\
-        .droplevel(level=0, axis=1)
+        .pivot(index=["instrument", "sex", "id", "bin_edge"], columns="hand", values="value")
 
-    # Impute left / right hand if selected
     if checkbox_background_hand:
-        background_data["left"] = background_data["left"].fillna(
-            background_data["right"])
-        background_data["right"] = background_data["right"].fillna(
-            background_data["left"])
+        # Fill left or right hand background value if not available
+        background_data[["left", "right"]] = background_data[["left", "right"]]\
+            .bfill(axis=1).ffill(axis=1)
 
     # Filter background and melt
     background_data = background_data.loc[instrument, sex]
     background_data = background_data\
-        .melt(ignore_index=False)\
-        .set_index("hand", append=True)\
+        .stack()\
         .reorder_levels(["id", "hand", "bin_edge"])
 
     # Parse uploaded data
@@ -444,25 +438,31 @@ def compute_plot_input_from_store(
             "id": np.int64,
             "left": np.float64,
             "right": np.float64
-        }).set_index(["id"])
-            .loc[:, ["left", "right"]]
-            .melt(ignore_index=False, var_name="hand")
-            .set_index("hand", append=True)
-        for key, item in upload_store.items()}
+        }) for key, item in upload_store.items()}
 
-    # Apply binning
+    binned_data = {}
     for key, data in uploaded_data.items():
-        # Only process IDs where background is available
-        data = data.loc[background_data.index.get_level_values("id")]
+        # Drop NaN values
+        # Keep as dataframe to allow index access in "apply"
+        data = data\
+            .melt(id_vars=["id"], value_vars=["left", "right"], var_name="hand")\
+            .set_index(["id", "hand"])\
+            .dropna()
 
-        # Apply binning
+        # Only process IDs with available background
+        data = data.loc[background_data.unstack(
+            "bin_edge").index.intersection(data.index)]
+
+        # Apply binning and assign to value
         data["value"] = data.apply(
             lambda row: return_wagner_decile(
-                background_data.loc[row.name, "value"], row["value"]
+                background_data.loc[row.name], row["value"]
             ), axis=1
         )
 
-    return True
+        binned_data[key] = data.to_dict()
+
+    return binned_data
 
 
 @callback(

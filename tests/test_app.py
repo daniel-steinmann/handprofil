@@ -86,44 +86,70 @@ def test_load_static_data():
 
 
 @pytest.mark.parametrize(
-    "upload_path, sex, instrument, checkbox_background_hand, checkbox_show_all_measures",
-    [("data/measurement_template_filled.xlsx", "m", "violine", True, True)],
+    "checkbox_background_hand",
+    [(True), (False)],
 )
 def test_compute_plot_input_from_store(
-    upload_path, sex, instrument, checkbox_background_hand, checkbox_show_all_measures
+    checkbox_background_hand
 ):
-    # Arrange
-    # Upload data
-    path = get_testfile_path(upload_path)
-    with open(path, 'rb') as data:
-        content = "xslx," + base64.b64encode(data.read()).decode('UTF-8')
-    contents = [content, content]
-    upload_store, _, errors = upload_files_to_store(contents, {})
+    # background_choice
+    sex = "m"
+    instrument = "violine"
 
-    # Static data
-    static_store = load_static_data("dummy")
+    # There is no background for id=8
+    upload_store = {
+        "key1": {
+            "data": {
+                "id": {0: 1, 1: 8},
+                "device": {0: "dummy", 1: "dummy"},
+                "description": {0: "dummy", 1: "dummy"},
+                "left": {0: 178.0, 1: 94.0},
+                "right": {0: 181.0, 1: 95.0}
+            }
+        },
+        "key2": {
+            "data": {
+                "id": {0: 1, 1: 8},
+                "device": {0: "dummy", 1: "dummy"},
+                "description": {0: "dummy", 1: "dummy"},
+                "left": {0: 178.0, 1: 94.0},
+                "right": {0: 181.0, 1: 95.0}
+            }
+        }
+    }
 
-    # Hands shown
-    hands_shown_values = [["left", "right"], ["left"]]
-    hands_shown_ids = list(upload_store.keys())
+    static_store = {
+        "background_data": {
+            "instrument": {0: "violine", 1: "violine", 2: "egitarre"},
+            "sex": {0: "m", 1: "m", 2: "m"},
+            "hand": {0: "left", 1: "left", 2: "right"},
+            "id": {0: 1, 1: 1, 2: 1},
+            "bin_edge": {0: 1, 1: 2, 2: 1},
+            "value": {0: 177.0, 1: 181.0, 2: 160}
+        }
+    }
 
     # Act
-    compute_plot_input_from_store(
+    result = compute_plot_input_from_store(
         upload_store,
         sex,
         instrument,
         checkbox_background_hand,
-        checkbox_show_all_measures,
-        hands_shown_values,
-        hands_shown_ids,
+        # hands_shown_values,
+        # hands_shown_ids,
         static_store,
     )
 
     # Assert
-    assert True
+    result_dfs = {
+        key: pd.DataFrame.from_dict(df) for key, df in result.items()
+    }
 
-    # dict: per id
-    #     | left | right
-    # id1 |  12  |  NaN
-    # id2 |  3   |  4
-    # id3 |  5   |  6
+    assert result_dfs["key1"].loc[(1, "left")].value == 3
+
+    if checkbox_background_hand:
+        assert result_dfs["key1"].loc[(1, "right")].value == 4
+    else:
+        # Right hand value should not be part of result
+        # if values were not imputed
+        assert ((1, "right") in list(result_dfs["key1"].index)) == False
