@@ -415,12 +415,16 @@ def compute_binned_values(
         background_data[["left", "right"]] = background_data[["left", "right"]]\
             .bfill(axis=1).ffill(axis=1)
 
-    # Filter background and melt
-    background_data = background_data.loc[instrument, sex]
+    background_data = background_data.reset_index().melt(
+        id_vars=['id', 'instrument', 'sex', 'bin_edge'])
+
+    # Filter background
+    background_data = background_data.query(
+        'sex == @sex & instrument == @instrument')
+
     background_data = background_data\
-        .stack()\
-        .reorder_levels(["id", "hand", "bin_edge"])\
-        .sort_index()
+        .set_index(["id", "hand", "bin_edge"])\
+        .dropna()
 
     # Parse uploaded data
     uploaded_data = [
@@ -446,12 +450,14 @@ def compute_binned_values(
         # Apply binning and assign to value
         data["value"] = data.apply(
             lambda row: return_wagner_decile(
-                background_data.loc[row.name], row["value"]
+                background_data.loc[row.name, "value"], row["value"]
             ), axis=1
         )
 
+        data = data.reset_index()
+
         # Reset index for json serialization
-        binned_data.append(data.reset_index().to_json())
+        binned_data.append(data.to_dict())
 
     return binned_data
 
@@ -471,7 +477,7 @@ def get_plot_input_data(
     static_store: dict
 ):
     decile_data_store = [
-        pd.read_json(StringIO(item)).set_index(["id", "hand"]) for item in decile_data_store
+        pd.DataFrame.from_dict(item).set_index(["id", "hand"]) for item in decile_data_store
     ]
 
     static_store = {
@@ -480,14 +486,18 @@ def get_plot_input_data(
 
     plot_files = []
     for i, file in enumerate(decile_data_store):
-        # Only keep specified hand values
         plot = static_store['measure_labels'].set_index('id')
+
+        # Only get specified hands
+        file = file.reset_index()\
+
+        file = file\
+            .loc[file["hand"].isin(hands_shown_values[0])]\
+            .set_index(["id"])
 
         # Add labels and flatten
         merge_type = 'left' if show_only_measured_metrics else 'right'
         file = file\
-            .loc[file.index.get_level_values('hand').isin(hands_shown_values[0])]\
-            .reset_index('hand')\
             .merge(plot, how=merge_type, left_index=True, right_index=True)\
             .reset_index()\
 
@@ -517,11 +527,16 @@ def create_plots(
 
     all_files = []
     for file_id, file in enumerate(plot_data_store):
-        file: pd.DataFrame = file.set_index('id')
-        file.loc[:, "file_id"] = file_id
-        all_files.append(file)
+        # Check here if dataframe is not empty
+        if len(file) != 0:
+            file = file.set_index('id')
+            file.loc[:, "file_id"] = file_id
+            all_files.append(file)
 
-    # bring to final flat form
+    # Check here if all files are empty
+    if len(all_files) == 0:
+        return []
+
     plot_input = my_concat(all_files, axis=0)\
         .reset_index()\
         .set_index("id", drop=False)
@@ -537,9 +552,10 @@ def create_plots(
 
     all_plots_children = []
     for section_id, section in enumerate(section_config):
-        figure = frontend.return_section_figure(plot_input, section_id)
-        child = frontend.wrap_figure_in_graph(section["title"], figure)
-        all_plots_children.append(child)
+        if len(plot_input[plot_input["section_id"] == section_id]):
+            figure = frontend.return_section_figure(plot_input, section_id)
+            child = frontend.wrap_figure_in_graph(section["title"], figure)
+            all_plots_children.append(child)
 
     return all_plots_children
 

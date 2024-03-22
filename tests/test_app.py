@@ -103,7 +103,7 @@ def test_compute_binned_values(
 
     # Assert
     result_dfs = [
-        pd.read_json(StringIO(df)).set_index(["id", "hand"]) for df in result
+        pd.DataFrame.from_dict(df).set_index(["id", "hand"]) for df in result
     ]
 
     # First parametrized test
@@ -118,7 +118,11 @@ def test_compute_binned_values(
             assert ((1, "right") in list(result_dfs[0].index)) == False
 
 
-def test_compute_plot_input_data():
+@pytest.mark.parametrize(
+    "no_data",
+    [(False), (True)]
+)
+def test_compute_plot_input_data(no_data):
     # Arrange
     # TODO: Test with empty
     decile_data_store = [
@@ -151,9 +155,20 @@ def test_compute_plot_input_data():
             }
         }
     ]
-    decile_data_store = [
-        pd.DataFrame.from_dict(item).to_json() for item in decile_data_store
-    ]
+
+    if no_data:
+        decile_data_store = [
+            {
+                "id": {},
+                "hand": {},
+                "value": {}
+            },
+            {
+                "id": {},
+                "hand": {},
+                "value": {}
+            }
+        ]
 
     static_store = {
         "measure_labels": {
@@ -193,24 +208,29 @@ def test_compute_plot_input_data():
         pd.DataFrame.from_dict(item) for item in results
     ]
 
-    for df in dataframes:
-        assert 'id' in df.columns
-        assert 'hand' in df.columns
-        assert 'value' in df.columns
-        assert 'device' in df.columns
-        assert 'description' in df.columns
-        assert 'unit' in df.columns
-        assert len(df.columns) == 6
+    if not no_data:
+        for df in dataframes:
+            assert 'id' in df.columns
+            assert 'hand' in df.columns
+            assert 'value' in df.columns
+            assert 'device' in df.columns
+            assert 'description' in df.columns
+            assert 'unit' in df.columns
+            assert len(df.columns) == 6
 
-    assert dataframes[0].set_index(
-        ["id", "hand"]).loc[(1, "right"), "value"] == 14
-    assert dataframes[0].set_index(
-        ["id", "hand"]).loc[(1, "left"), "value"] == 12
-    assert dataframes[1].set_index(
-        ["id", "hand"]).loc[(1, "right"), "value"] == 15
+        assert dataframes[0].set_index(
+            ["id", "hand"]).loc[(1, "right"), "value"] == 14
+        assert dataframes[0].set_index(
+            ["id", "hand"]).loc[(1, "left"), "value"] == 12
+        assert dataframes[1].set_index(
+            ["id", "hand"]).loc[(1, "right"), "value"] == 15
 
 
-def test_create_plots():
+@pytest.mark.parametrize(
+    "no_data",
+    [(False), (True)]
+)
+def test_create_plots(no_data):
     # Arrange
     static_store = {
         "section_config":
@@ -314,8 +334,34 @@ def test_create_plots():
             "1": "mm",
             "2": "mm",
             "3": "mm"
-        }
+        },
+    },
+        {
+            "id": {},
+            "hand": {},
+            "value": {},
+            "device": {},
+            "description": {},
+            "unit": {}
     }]
+
+    if no_data:
+        plot_data_store = [{
+            "id": {},
+            "hand": {},
+            "value": {},
+            "device": {},
+            "description": {},
+            "unit": {}
+        },
+            {
+            "id": {},
+            "hand": {},
+            "value": {},
+            "device": {},
+            "description": {},
+            "unit": {}
+        }]
 
     # Act
     result = create_plots(plot_data_store, static_store)
