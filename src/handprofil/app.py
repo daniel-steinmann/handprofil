@@ -480,6 +480,7 @@ def get_plot_input_data(
         plot = static_store['measure_labels'].set_index('id')
 
         # Add labels and flatten
+        # TODO: keep data in long format to avoid having to select columns here
         file = file.unstack()\
             .loc[:, ("value", hands_shown_values[i])]\
             .droplevel(0, axis=1)\
