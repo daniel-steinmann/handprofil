@@ -48,16 +48,15 @@ def test_load_static_data():
 
 
 @pytest.mark.parametrize(
-    "checkbox_background_hand",
-    [(True), (False)],
+    "checkbox_background_hand, instrument, sex",
+    [(True, "violine", "m"), (False, "violine", "w"),
+     (False, "schlagzeug", "w"), (False, "schlagzeug", "m")]
 )
 def test_compute_binned_values(
-    checkbox_background_hand
+    checkbox_background_hand,
+    instrument,
+    sex
 ):
-    # background_choice
-    sex = "m"
-    instrument = "violine"
-
     # There is no background for id=8
     upload_store = [
         {
@@ -107,14 +106,16 @@ def test_compute_binned_values(
         pd.read_json(StringIO(df)).set_index(["id", "hand"]) for df in result
     ]
 
-    assert result_dfs[0].loc[(1, "left")].value == 3
+    # First parametrized test
+    if instrument == 'violine' and sex == 'm':
+        assert result_dfs[0].loc[(1, "left")].value == 3
 
-    if checkbox_background_hand:
-        assert result_dfs[0].loc[(1, "right")].value == 4
-    else:
-        # Right hand value should not be part of result
-        # if values were not imputed
-        assert ((1, "right") in list(result_dfs[0].index)) == False
+        if checkbox_background_hand:
+            assert result_dfs[0].loc[(1, "right")].value == 4
+        else:
+            # Right hand value should not be part of result
+            # if values were not imputed
+            assert ((1, "right") in list(result_dfs[0].index)) == False
 
 
 def test_compute_plot_input_data():
