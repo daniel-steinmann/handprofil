@@ -114,11 +114,15 @@ def return_section_figure(df: pd.DataFrame, section_id: int):
             linestyle = "solid" if hand == "right" else "dash"
             symbol = "circle" if hand == "right" else "diamond-open"
 
+            # Need double bracket in .loc[[]] to prevent getting series
             in_df = df_per_section.set_index(
                 ["file_id", "hand"])\
                 .sort_index()\
-                .loc[(file_id, hand)]\
-                .sort_values(by="section_position")
+                .loc[[(file_id, hand)]]\
+
+            in_df = in_df\
+                .set_index("section_position", drop=False)\
+                .sort_index()
 
             fig.add_trace(__return_trace(in_df, color, linestyle, symbol))
 

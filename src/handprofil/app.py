@@ -481,12 +481,14 @@ def get_plot_input_data(
 
         # Add labels and flatten
         # TODO: keep data in long format to avoid having to select columns here
-        file = file.unstack()\
-            .loc[:, ("value", hands_shown_values[i])]\
-            .droplevel(0, axis=1)\
+        file = file\
+            .loc[file.index.get_level_values('hand').isin(hands_shown_values[0])]\
+            .reset_index('hand')\
             .merge(plot, how='left', left_index=True, right_index=True)\
             .reset_index()\
-            .to_dict()
+
+        # Easier to debug
+        file = file.to_dict()
 
         plot_files.append(file)
 
@@ -516,8 +518,10 @@ def create_plots(
         all_files.append(file)
 
     # bring to final flat form
-    plot_input = my_concat(all_files, axis=0).reset_index().melt(id_vars=[
-        "id", "device", "description", "unit", "file_id"], var_name="hand").set_index("id", drop=False)
+    plot_input = my_concat(all_files, axis=0)\
+        .reset_index()\
+        .set_index("id", drop=False)
+    # .melt(id_vars=["id", "device", "description", "unit", "file_id"], var_name="hand")\
 
     for section_id, section in enumerate(section_config):
         section_position = 0

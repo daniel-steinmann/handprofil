@@ -119,6 +119,7 @@ def test_compute_binned_values(
 
 def test_compute_plot_input_data():
     # Arrange
+    # TODO: Test with empty
     decile_data_store = [
         {
             "id": {
@@ -191,10 +192,21 @@ def test_compute_plot_input_data():
         pd.DataFrame.from_dict(item) for item in results
     ]
 
-    assert dataframes[0].loc[0, "right"] == 14
-    assert dataframes[0].loc[0, "left"] == 12
-    assert dataframes[1].loc[0, "right"] == 15
-    assert ("left" not in dataframes[1].columns) == True
+    for df in dataframes:
+        assert 'id' in df.columns
+        assert 'hand' in df.columns
+        assert 'value' in df.columns
+        assert 'device' in df.columns
+        assert 'description' in df.columns
+        assert 'unit' in df.columns
+        assert len(df.columns) == 6
+
+    assert dataframes[0].set_index(
+        ["id", "hand"]).loc[(1, "right"), "value"] == 14
+    assert dataframes[0].set_index(
+        ["id", "hand"]).loc[(1, "left"), "value"] == 12
+    assert dataframes[1].set_index(
+        ["id", "hand"]).loc[(1, "right"), "value"] == 15
 
 
 def test_create_plots():
@@ -219,58 +231,88 @@ def test_create_plots():
         "id": {
             "0": 1,
             "1": 2,
-            "2": 3
+            "2": 3,
+            "3": 1,
+            "4": 2,
+            "5": 3
         },
-        "right": {
+        "hand": {
+            "0": "right",
+            "1": "right",
+            "2": "right",
+            "3": "left",
+            "4": "left",
+            "5": "left"
+        },
+        "value": {
             "0": 14,
             "1": 2,
-            "2": 2
-        },
-        "left": {
-            "0": 12,
-            "1": 4,
-            "2": 10
+            "2": 2,
+            "3": 12,
+            "4": 4,
+            "5": 10
         },
         "device": {
             "0": "Handlabor",
             "1": "Handlabor",
-            "2": "Handlabor"
+            "2": "Handlabor",
+            "3": "Handlabor",
+            "4": "Handlabor",
+            "5": "Handlabor"
         },
         "description": {
             "0": "Handlänge",
             "1": "Handbreite",
-            "2": "Fingerlänge"
+            "2": "Fingerlänge",
+            "3": "Handlänge",
+            "4": "Handbreite",
+            "5": "Fingerlänge"
         },
         "unit": {
             "0": "mm",
             "1": "mm",
-            "2": "mm"
+            "2": "mm",
+            "3": "mm",
+            "4": "mm",
+            "5": "mm"
         }
     },
         {
         "id": {
             "0": 1,
-            "1": 2
+            "1": 2,
+            "2": 1,
+            "3": 2
         },
-        "right": {
+        "hand": {
+            "0": "right",
+            "1": "right",
+            "2": "left",
+            "3": "left"
+        },
+        "value": {
             "0": 2,
-            "1": 10
-        },
-        "left": {
-            "0": 3,
-            "1": 6
+            "1": 10,
+            "2": 3,
+            "3": 6
         },
         "device": {
             "0": "Handlabor",
-            "1": "Handlabor"
+            "1": "Handlabor",
+            "2": "Handlabor",
+            "3": "Handlabor"
         },
         "description": {
             "0": "Handlänge",
-            "1": "Handbreite"
+            "1": "Handbreite",
+            "2": "Handlänge",
+            "3": "Handbreite"
         },
         "unit": {
             "0": "mm",
-            "1": "mm"
+            "1": "mm",
+            "2": "mm",
+            "3": "mm"
         }
     }]
 
