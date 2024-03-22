@@ -397,6 +397,8 @@ def compute_binned_values(
     checkbox_background_hand: bool,
     static_store: dict
 ):
+    if upload_store is None:
+        raise PreventUpdate
 
     # Background is the same for all
     background_data = pd.DataFrame.from_dict(static_store["background_data"])\
@@ -424,6 +426,7 @@ def compute_binned_values(
 
     background_data = background_data\
         .set_index(["id", "hand", "bin_edge"])\
+        .sort_index()\
         .dropna()
 
     # Parse uploaded data
@@ -445,7 +448,8 @@ def compute_binned_values(
 
         # Only process IDs with available background
         data = data.loc[background_data.unstack(
-            "bin_edge").index.intersection(data.index)]
+            "bin_edge").index.intersection(data.index)]\
+            .sort_index()\
 
         # Apply binning and assign to value
         data["value"] = data.apply(
@@ -476,6 +480,9 @@ def get_plot_input_data(
     show_only_measured_metrics: bool,
     static_store: dict
 ):
+    if decile_data_store is None:
+        raise PreventUpdate
+
     decile_data_store = [
         pd.DataFrame.from_dict(item).set_index(["id", "hand"]) for item in decile_data_store
     ]
