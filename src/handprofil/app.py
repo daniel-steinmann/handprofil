@@ -240,35 +240,9 @@ app.layout = dmc.Container(
         dmc.Container(
             style=container_style,
             children=[
-                dmc.Center(
-                    children=[
-                        dmc.Select(
-                            label="Darstellung",
-                            searchable=True,
-                            placeholder="Select one",
-                            id="select-plotstyle",
-                            value="decile",
-                            data=plot_style_data,
-                            style={"width": 200,
-                                   "marginBottom": 10},
-                        )
-                    ]
-                )
-            ]
-        ),
-        dmc.Container(
-            style=container_style,
-            children=[
-                dmc.Title(dmc.Text("Uploads Debugger"), order=2),
+                dmc.Title(dmc.Text("Dateien"), order=2),
                 dmc.Container(id="upload-debug-container"),
                 dmc.Container(id="upload-error-messages"),
-            ]),
-        dmc.Container(
-            style=container_style,
-            children=[
-                dmc.Title(dmc.Text("Uploads"), order=2),
-                dmc.Container(id="upload-alerts"),
-                subject_grid
             ]),
         dmc.Container(
             style=container_style,
@@ -573,30 +547,33 @@ def create_plots(
     prevent_initial_call=True,
 )
 def display_upload_store_content(data: list):
-    return [dmc.Container(children=[
-        html.Div(f"File-Index: {id} "),
-        dmc.ActionIcon(
-            DashIconify(icon="mdi:trash", width=20),
-            size="lg",
-            variant="filled",
-            id={"type": "delete-file-button", "index": id},
-            n_clicks=0,
-            mb=10,
-        ), dmc.ChipGroup(
-            [
-                dmc.Chip(
-                    x,
-                    value=x,
-                    variant="outline",
-                )
-                for x in hand_data["values"]
-            ],
-            id={"type": "chips-hand", "index": id},
-            value=hand_data["values"],
-            multiple=True,
-            mt=10,
-        )], style={"color": px.colors.qualitative.G10[id]})
-        for id, value in enumerate(data)]
+    return [dmc.SimpleGrid(
+        cols=3,
+        children=[
+            dmc.Text(f'{value["filename"]}'),
+            dmc.ChipGroup(
+                [
+                    dmc.Chip(
+                        x,
+                        value=x,
+                        variant="outline",
+                    )
+                    for x in hand_data["values"]
+                ],
+                id={"type": "chips-hand", "index": id},
+                value=hand_data["values"],
+                multiple=True,
+                mt=10,
+            ),
+            dmc.ActionIcon(
+                DashIconify(icon="mdi:trash", width=20),
+                size="lg",
+                variant="filled",
+                id={"type": "delete-file-button", "index": id},
+                n_clicks=0,
+                mb=10,
+            )], style={"color": px.colors.qualitative.G10[id]})
+            for id, value in enumerate(data)]
 
 
 @callback(
@@ -620,15 +597,16 @@ def delete_file_from_store(n_clicks, id: dict, data: dict):
     Output('upload-data', 'contents'),
     Output('upload-error-messages', 'children'),
     Input('upload-data', 'contents'),
+    State('upload-data', 'filename'),
     State('upload-store', 'data'),
     prevent_initial_call=True,
 )
-def upload_files_to_store(list_of_contents, store_state):
+def upload_files_to_store(list_of_contents, list_of_filenames, store_state):
     if list_of_contents is None:
         raise PreventUpdate
 
     results = [
-        uploadparser.parse_contents(c) for c in list_of_contents
+        uploadparser.parse_contents(c, f) for c, f in zip(list_of_contents, list_of_filenames)
     ]
 
     new_items = [

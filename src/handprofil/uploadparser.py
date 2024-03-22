@@ -6,7 +6,7 @@ import io
 import numpy as np
 
 
-def parse_contents(contents) -> dict:
+def parse_contents(contents, filename) -> dict:
     content_type, content_string = contents.split(",")
 
     decoded = base64.b64decode(content_string)
@@ -40,7 +40,7 @@ def parse_contents(contents) -> dict:
     except Exception as e:
         return False, e
 
-    return True, {"info": info.to_dict(), "data": data.to_dict()}
+    return True, {"info": info.to_dict(), "data": data.to_dict(), "filename": filename}
 
 
 def parse_and_validate_uploads(
