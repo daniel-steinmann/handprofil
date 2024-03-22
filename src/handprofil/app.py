@@ -80,6 +80,9 @@ container_style = {
 ###################
 
 
+def my_concat(dfs_list, axis=0): return pd.concat(dfs_list, axis=axis)
+
+
 def get_bin_edges(
     instrument: str, sex: str, hand: str, background: pd.DataFrame
 ) -> pd.DataFrame:
@@ -507,19 +510,21 @@ def create_plots(
 
     all_files = []
     for file_id, file in enumerate(plot_data_store):
-        file = file.set_index('id')
+        file: pd.DataFrame = file.set_index('id')
         file.loc[:, "file_id"] = file_id
-        for section_id, section in enumerate(section_config):
-            for section_order, index in enumerate(section['index_order']):
-                if index in file.index:
-                    file.loc[index, "section_id"] = section_id
-                    file.loc[index, "section_order"] = section_order
         all_files.append(file)
 
     # bring to final flat form
-    plot_input = pd.concat(all_files, axis=0)\
-        .reset_index()\
-        .melt(id_vars=["id", "device", "description", "unit", "file_id", "section_id", "section_order"], var_name="hand")
+    plot_input = my_concat(all_files, axis=0).reset_index().melt(id_vars=[
+        "id", "device", "description", "unit", "file_id"], var_name="hand").set_index("id", drop=False)
+
+    for section_id, section in enumerate(section_config):
+        section_position = 0
+        for index in section['index_order']:
+            if index in plot_input.index:
+                plot_input.loc[index, "section_id"] = section_id
+                plot_input.loc[index, "section_position"] = section_position
+                section_position = section_position + 1
 
     all_plots_children = []
     for section_id, section in enumerate(section_config):

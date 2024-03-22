@@ -21,7 +21,7 @@ def __return_ticktext(plot_df):
 def __return_trace(df: pd.DataFrame, color, linestyle, symbol):
     return go.Scatter(
         x=pd.Series(df.value),
-        y=pd.Series(df.section_order),
+        y=pd.Series(df.section_position),
         marker=dict(size=16, color=color, symbol=symbol),
         mode="lines+markers",
         line=go.scatter.Line(color=color, dash=linestyle, width=2),
@@ -37,7 +37,7 @@ def return_section_figure(df: pd.DataFrame, section_id: int):
 
     fig = px.scatter()
     ticktext = __return_ticktext(
-        df_per_section[["id", "description", "unit"]].drop_duplicates().reset_index())
+        df_per_section[["id", "description", "unit", "section_position"]].drop_duplicates().sort_values(by="section_position").reset_index(drop=True))
 
     fig.update_layout(
         width=1000,
@@ -118,7 +118,7 @@ def return_section_figure(df: pd.DataFrame, section_id: int):
                 ["file_id", "hand"])\
                 .sort_index()\
                 .loc[(file_id, hand)]\
-                .sort_values(by="section_order")
+                .sort_values(by="section_position")
 
             fig.add_trace(__return_trace(in_df, color, linestyle, symbol))
 
