@@ -305,7 +305,7 @@ app.layout = dmc.Container(
                                 dmc.Checkbox(
                                     id="checkbox-background-hand", label="Hintergrund bei fehlender Hand durch andere Hand ersetzen.", checked=True),
                                 dmc.Checkbox(
-                                    id="checkbox-show-all-measures", label="Nur Metriken mit vorhandener Messung anzeigen.", checked=False),
+                                    id="checkbox-show-only-measured-metrics", label="Nur Metriken mit vorhandener Messung und verfügbarem Hintergrund anzeigen.", checked=True),
                             ]
                         )
                     ])
@@ -368,6 +368,10 @@ def load_static_data(trigger):
             "src/handprofil/config/plot_sections.json"), "r"
     ) as file:
         section_config = json.load(file)
+
+    # Check if all measure labels are present in section config
+    assert set(measure_labels['id'].values()) == set(
+        [index for item in section_config for index in item["index_order"]])
 
     return {
         "measure_labels": measure_labels,
@@ -456,14 +460,14 @@ def compute_binned_values(
     Output("plot-data-store", 'data'),
     Input('decile-data-store', 'data'),
     Input({"type": 'chips-hand', "index": ALL}, 'value'),
-    Input({"type": 'chips-hand', "index": ALL}, 'id'),
+    Input('checkbox-show-only-measured-metrics', 'checked'),
     State('static-store', 'data'),
     prevent_initial_call=True
 )
 def get_plot_input_data(
     decile_data_store: str,
     hands_shown_values: list,
-    hands_shown_ids: list,
+    show_only_measured_metrics: bool,
     static_store: dict
 ):
     decile_data_store = [
@@ -480,11 +484,11 @@ def get_plot_input_data(
         plot = static_store['measure_labels'].set_index('id')
 
         # Add labels and flatten
-        # TODO: keep data in long format to avoid having to select columns here
+        merge_type = 'left' if show_only_measured_metrics else 'right'
         file = file\
             .loc[file.index.get_level_values('hand').isin(hands_shown_values[0])]\
             .reset_index('hand')\
-            .merge(plot, how='left', left_index=True, right_index=True)\
+            .merge(plot, how=merge_type, left_index=True, right_index=True)\
             .reset_index()\
 
         # Easier to debug
