@@ -635,5 +635,6 @@ def func(n_clicks):
 #######################
 # Run the App
 if __name__ == "__main__":
-    # app.run_server(debug=True)
-    app.run(debug=True)
+    app.run_server(debug=False)
+    # For local development
+    # app.run(debug=True)
