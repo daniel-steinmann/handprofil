@@ -28,7 +28,7 @@ def test_validate_meta_attributes(filename, expected):
     contents = [content, content]
 
     # Act
-    data, _, _ = upload_files_to_store(contents, {})
+    data, _, _ = upload_files_to_store(contents, [filename, filename], {})
 
     # Assert
     pd.DataFrame.from_dict({})
