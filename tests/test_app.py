@@ -1,20 +1,18 @@
 import base64
-from io import StringIO
 import os
 import pytest
 import pandas as pd
 from handprofil.app import (
     return_wagner_decile,
-    get_bin_edges,
-    measurements_to_bins,
     load_static_data,
     compute_binned_values,
-    upload_files_to_store,
     get_plot_input_data,
-    create_plots
-)
-from handprofil.utils import (
-    load_background
+    create_plots,
+    upload_files_to_store,
+    load_attributes,
+    load_background,
+    load_meta_attributes,
+    load_plot_section_config
 )
 
 
@@ -368,3 +366,63 @@ def test_create_plots(no_data):
 
     # Assert
     x = result
+
+
+def get_testfile_path(relative_path):
+    directory_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(directory_path, relative_path)
+
+
+@pytest.mark.parametrize(
+    "filename, expected",
+    [
+        ("measurement_template_filled.xlsx", True),
+    ],
+)
+def test_validate_meta_attributes(filename, expected):
+    # Arrange
+    path = get_testfile_path(f"data/{filename}")
+
+    with open(path, 'rb') as data:
+        content = "xslx," + base64.b64encode(data.read()).decode('UTF-8')
+
+    contents = [content, content]
+
+    # Act
+    data, _, _ = upload_files_to_store(contents, [filename, filename], {})
+
+    # Assert
+    pd.DataFrame.from_dict({})
+    assert len(data) == 2
+    first_content = data[0]
+    info = pd.DataFrame.from_dict(first_content['info'])
+    data = pd.DataFrame.from_dict(first_content['data'])
+
+
+def test_load_attributes():
+    # Arrange
+    # Act
+    df = load_attributes()
+
+
+def test_load_meta_attributes():
+    """
+    Testing Upload Function
+    """
+    # Arrange
+    # Act
+    df = load_meta_attributes()
+
+
+def test_load_background():
+    """
+    Testing Upload Function
+    """
+    # Arrange
+    # Act
+    df = load_background()
+
+
+def test_load_plot_section_config():
+
+    section = load_plot_section_config()
