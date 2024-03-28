@@ -851,25 +851,6 @@ def delete_file_from_store(n_clicks, id: dict, data: dict):
 
 
 @callback(
-    Output('all-measurements', 'data', allow_duplicate=True),
-    Input('upload-store', 'data'),
-    prevent_initial_call=True
-)
-def concatenate_to_all_measurements(upload_store: dict):
-
-    all_data = [
-        pd.DataFrame.from_dict(value["data"])
-        .melt(id_vars=["id", "device", "description"], value_vars=["left", "right"], var_name="hand", value_name="value", ignore_index=True)
-        .dropna()
-        .assign(file_id=index)
-
-        for index, value in enumerate(upload_store)
-    ]
-
-    return pd.concat(all_data).to_dict()
-
-
-@callback(
     Output('upload-store', 'data', allow_duplicate=True),
     # Workaround for https://github.com/plotly/dash-core-components/issues/816
     Output('upload-data', 'contents'),
