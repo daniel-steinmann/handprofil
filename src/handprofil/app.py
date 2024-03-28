@@ -16,6 +16,7 @@ import os
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 import plotly.express as px
+from datetime import datetime
 
 
 ###################
@@ -56,10 +57,16 @@ sex_data = [
     ["w", "Weiblich"],
 ]
 
-hand_data = {
-    "labels": ["Links", "Rechts"],
-    "values": ["left", "right"],
-}
+hand_data = [
+    {
+        "value": "left",
+        "label": "Links (◇)"
+    },
+    {
+        "value": "right",
+        "label": "Rechts (●)"
+    }
+]
 
 ###################
 ### Styles ########
@@ -220,6 +227,9 @@ def parse_contents(contents, filename) -> dict:
         )
     except Exception as e:
         return False, e
+
+    if len(data.dropna(subset=["left", "right"], how="all")) == 0:
+        return False, "Keine Messungen gefunden"
 
     return True, {"info": info.to_dict(), "data": data.to_dict(), "filename": filename}
 
@@ -806,33 +816,72 @@ def create_plots(
     prevent_initial_call=True,
 )
 def display_upload_store_content(data: list):
-    return [dmc.SimpleGrid(
-        cols=3,
-        children=[
-            dmc.Text(f'{value["filename"]}'),
-            dmc.ChipGroup(
-                [
-                    dmc.Chip(
-                        x,
-                        value=x,
+    children = []
+    for id, value in enumerate(data):
+        filename = value["filename"]
+        info = pd.DataFrame.from_dict(value["info"]).set_index('id')["value"]
+
+        try:
+            measure_date = datetime.strptime(
+                info.get(2), '%Y-%m-%dT%H:%M:%S').strftime('%d.%m.%Y')
+            birth_date = datetime.strptime(
+                info.get(5), '%Y-%m-%dT%H:%M:%S').strftime('%d.%m.%Y')
+        except:
+            measure_date = ""
+            birth_date = ""
+
+        child = dmc.SimpleGrid(
+            style={
+                "borderColor": px.colors.qualitative.G10[id],
+                "border": f"4px solid {px.colors.qualitative.G10[id]}",
+                "borderRadius": 16,
+                "padding": 20,
+                "marginTop": 20,
+                "marginBottom": 20,
+            },
+            cols=3,
+            children=[
+                dmc.Container(
+                    children=[
+                        dmc.Text(f'Datei: {filename}'),
+                        dmc.Text(f'ID: {info.get(1, "")}'),
+                        dmc.Text(f'Datum: {measure_date}')
+                    ]
+                ),
+                dmc.Container(
+                    children=[
+                        dmc.Text(
+                            f'{info.get(3, "")}, {info.get(4, "")} ({info.get(6,"")})'),
+                        dmc.Text(f'{birth_date}'),
+                        dmc.Text(f'Händigkeit: {info.get(7, "")}'),
+                        dmc.Text(f'Instrument: {info.get(8, "")}'),
+                    ]
+                ),
+                dmc.Group([
+                    dmc.ChipGroup(
+                        [
+                            dmc.Chip(
+                                x["label"],
+                                value=x["value"],
+                                variant="filled",
+                                color='green'
+                            )
+                            for x in hand_data
+                        ],
+                        id={"type": "chips-hand", "index": id},
+                        value=["left", "right"],
+                        multiple=True,
+                    ), dmc.ActionIcon(
+                        DashIconify(icon="mdi:trash", width=20),
                         variant="outline",
-                    )
-                    for x in hand_data["values"]
-                ],
-                id={"type": "chips-hand", "index": id},
-                value=hand_data["values"],
-                multiple=True,
-                mt=10,
-            ),
-            dmc.ActionIcon(
-                DashIconify(icon="mdi:trash", width=20),
-                size="lg",
-                variant="filled",
-                id={"type": "delete-file-button", "index": id},
-                n_clicks=0,
-                mb=10,
-            )], style={"color": px.colors.qualitative.G10[id]})
-            for id, value in enumerate(data)]
+                        id={"type": "delete-file-button", "index": id},
+                        n_clicks=0,
+                        radius="xl",
+                        color="red",
+                    )])])
+        children.append(child)
+
+    return children
 
 
 @callback(
@@ -873,7 +922,7 @@ def upload_files_to_store(list_of_contents, list_of_filenames, store_state):
     ]
 
     errors = [
-        html.Div(f"Upload failed with {e}") for result, e in results if not result
+        dmc.Alert(e, title="Fehler beim Upload", color="red") for result, e in results if not result
     ]
 
     export = store_state + new_items if store_state else new_items
