@@ -68,6 +68,14 @@ hand_data = [
     }
 ]
 
+global_colors = [
+    "blue",
+    "red",
+    "violet",
+    "orange"
+    "lime",
+]
+
 ###################
 ### Styles ########
 ###################
@@ -346,7 +354,7 @@ def return_section_figure(df: pd.DataFrame, section_id: int):
 
     for file_id in df_per_section["file_id"].unique():
         for hand in df_per_section["hand"].unique():
-            color = px.colors.qualitative.G10[file_id]
+            color = global_colors[file_id]
             linestyle = "solid" if hand == "right" else "dash"
             symbol = "circle" if hand == "right" else "diamond-open"
 
@@ -832,8 +840,8 @@ def display_upload_store_content(data: list):
 
         child = dmc.SimpleGrid(
             style={
-                "borderColor": px.colors.qualitative.G10[id],
-                "border": f"4px solid {px.colors.qualitative.G10[id]}",
+                "borderColor": global_colors[id],
+                "border": f"4px solid {global_colors[id]}",
                 "borderRadius": 16,
                 "padding": 20,
                 "marginTop": 20,
@@ -864,7 +872,7 @@ def display_upload_store_content(data: list):
                                 x["label"],
                                 value=x["value"],
                                 variant="filled",
-                                color='green'
+                                color=global_colors[id]
                             )
                             for x in hand_data
                         ],
