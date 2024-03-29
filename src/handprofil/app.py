@@ -218,7 +218,9 @@ def parse_contents(contents, filename) -> dict:
                 "id": np.int64,
                 "description": str,
             }
-        )
+        )\
+            .dropna()
+
         data = pd.read_excel(
             io.BytesIO(decoded),
             header=0,
@@ -325,7 +327,8 @@ def return_section_figure(df: pd.DataFrame, section_id: int):
         margin=dict(autoexpand=False, l=labelmargin, r=0, t=0, b=50),
         showlegend=False,
         paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)"
+        plot_bgcolor="rgba(0,0,0,0)",
+        hovermode=False,
     )
 
     fig.add_shape(
@@ -380,7 +383,7 @@ def wrap_figure_in_graph(title: str, figure):
                 style={"height": "100%", "width": "100%"},
                 className="wait_time_graph",
                 config={
-                    "staticPlot": False,
+                    "staticPlot": True,
                     "editable": False,
                     "displayModeBar": False,
                 },
@@ -524,7 +527,8 @@ app.layout = dmc.Container(
             children=[
                 dmc.Title("Vergleichsgruppe (Hintergrund)", order=2),
                 dmc.Text(
-                    "Es werde nur Metriken angezeigt, für welche Hintergrundsdaten verfügbar sind."),
+                    "Es werde nur Metriken angezeigt, für welche Hintergrundsdaten verfügbar sind.",
+                ),
                 dmc.SimpleGrid(
                     cols=3,
                     children=[
@@ -537,7 +541,6 @@ app.layout = dmc.Container(
                             value="m",
                             label="Geschlecht",
                             size="sm",
-                            mt=10,
                         ),
                         dmc.Select(
                             label="Instrument",
@@ -546,16 +549,13 @@ app.layout = dmc.Container(
                             id="select-instrument",
                             value="gemischt",
                             data=instrument_data,
-                            style={"width": 200,
-                                   "marginBottom": 10},
-                        ),
-                        dmc.Container(
-                            [
-                                dmc.Checkbox(
-                                    id="checkbox-background-hand", label="Hintergrund bei fehlender Hand durch andere Hand ersetzen.", checked=True),
-                            ]
                         )
-                    ])
+                    ]),
+                dmc.Checkbox(
+                    id="checkbox-background-hand", label="Fehlender Hintergrund bei einer Hand durch andere Hand ersetzen.",
+                    checked=True,
+                    mt=10
+                ),
             ]
         ),
         dmc.Container(id="all-plots", style=container_style,
@@ -846,7 +846,7 @@ def display_upload_store_content(data: list):
                 dmc.Container(
                     children=[
                         dmc.Text(f'Datei: {filename}'),
-                        dmc.Text(f'ID: {info.get(1, "")}'),
+                        dmc.Text(f'ID: {info.get(1, " ")}'),
                         dmc.Text(f'Datum: {measure_date}')
                     ]
                 ),
