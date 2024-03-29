@@ -1,4 +1,3 @@
-
 ###################
 ### Imports ######
 ###################
@@ -68,6 +67,10 @@ hand_data = [
     }
 ]
 
+###################
+### Styles ########
+###################
+
 global_colors = [
     "blue",
     "red",
@@ -75,10 +78,6 @@ global_colors = [
     "orange"
     "lime",
 ]
-
-###################
-### Styles ########
-###################
 
 container_style = {
     "border": f"1px solid black",
@@ -97,6 +96,8 @@ def get_absolute_path(relative_path):
     directory_path = os.path.dirname(os.path.abspath(__file__))
     src_path = Path(directory_path).parents[1]
     return os.path.join(src_path, relative_path)
+
+# To avoid typechecking error https://github.com/microsoft/pylance-release/issues/5631
 
 
 def my_concat(dfs_list, axis=0): return pd.concat(dfs_list, axis=axis)
