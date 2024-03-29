@@ -359,10 +359,8 @@ def return_section_figure(df: pd.DataFrame, section_id: int):
             symbol = "circle" if hand == "right" else "diamond-open"
 
             # Need double bracket in .loc[[]] to prevent getting series
-            in_df = df_per_section.set_index(
-                ["file_id", "hand"])\
-                .sort_index()\
-                .loc[[(file_id, hand)]]\
+            in_df = df_per_section.query(
+                "hand ==  @hand & file_id == @file_id")
 
             in_df = in_df\
                 .set_index("section_position", drop=False)\
@@ -555,8 +553,6 @@ app.layout = dmc.Container(
                             [
                                 dmc.Checkbox(
                                     id="checkbox-background-hand", label="Hintergrund bei fehlender Hand durch andere Hand ersetzen.", checked=True),
-                                dmc.Checkbox(
-                                    id="checkbox-show-only-measured-metrics", label="Nur Metriken mit vorhandener Messung und verfügbarem Hintergrund anzeigen.", checked=True),
                             ]
                         )
                     ])
@@ -703,11 +699,12 @@ def compute_binned_values(
             .sort_index()\
 
         # Apply binning and assign to value
-        data["value"] = data.apply(
-            lambda row: return_wagner_decile(
-                background_data.loc[row.name, "value"], row["value"]
-            ), axis=1
-        )
+        if not data.empty:
+            data["value"] = data.apply(
+                lambda row: return_wagner_decile(
+                    background_data.loc[row.name, "value"], row["value"]
+                ), axis=1
+            )
 
         data = data.reset_index()
 
@@ -721,14 +718,12 @@ def compute_binned_values(
     Output("plot-data-store", 'data'),
     Input('decile-data-store', 'data'),
     Input({"type": 'chips-hand', "index": ALL}, 'value'),
-    Input('checkbox-show-only-measured-metrics', 'checked'),
     State('static-store', 'data'),
     prevent_initial_call=True
 )
 def get_plot_input_data(
     decile_data_store: str,
     hands_shown_values: list,
-    show_only_measured_metrics: bool,
     static_store: dict
 ):
     if decile_data_store is None:
@@ -750,13 +745,12 @@ def get_plot_input_data(
         file = file.reset_index()\
 
         file = file\
-            .loc[file["hand"].isin(hands_shown_values[0])]\
+            .loc[file["hand"].isin(hands_shown_values[i])]\
             .set_index(["id"])
 
         # Add labels and flatten
-        merge_type = 'left' if show_only_measured_metrics else 'right'
         file = file\
-            .merge(plot, how=merge_type, left_index=True, right_index=True)\
+            .merge(plot, how="left", left_index=True, right_index=True)\
             .reset_index()\
 
         # Easier to debug
