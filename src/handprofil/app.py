@@ -99,80 +99,11 @@ def get_absolute_path(relative_path):
     return os.path.join(src_path, relative_path)
 
 
-def load_attributes() -> pd.DataFrame:
-    df = pd.read_csv(get_absolute_path("src/handprofil/config/attributes.csv"))
-    df = df.set_index("id", drop=True)
-    return df
-
-
-def load_meta_attributes() -> pd.DataFrame:
-    df = pd.read_csv(get_absolute_path(
-        "src/handprofil/config/meta_attributes.csv"))
-    df = df.set_index("id", drop=True)
-    return df
-
-
-def load_background() -> pd.DataFrame:
-    df = pd.read_csv(get_absolute_path("src/handprofil/config/background.csv"))
-    return df
-
-
-def load_plot_section_config() -> list:
-    with open(
-        get_absolute_path("src/handprofil/config/plot_sections.json"), "r"
-    ) as file:
-        section_config = json.load(file)
-    return section_config
-
-
 def my_concat(dfs_list, axis=0): return pd.concat(dfs_list, axis=axis)
 
 ###################
 # Methods #########
 ###################
-
-
-def get_bin_edges(
-    instrument: str, sex: str, hand: str, background: pd.DataFrame
-) -> pd.DataFrame:
-
-    assert instrument in background["instrument"].unique()
-    assert hand in background["hand"].unique()
-    assert sex in background["sex"].unique()
-
-    background_filtered = background.query(
-        "instrument == @instrument & sex == @sex & hand == @hand"
-    ).set_index("id", drop=True)
-
-    bin_edges = background_filtered[
-        [
-            "bin_edge_1",
-            "bin_edge_2",
-            "bin_edge_3",
-            "bin_edge_4",
-            "bin_edge_5",
-            "bin_edge_6",
-            "bin_edge_7",
-            "bin_edge_8",
-            "bin_edge_9",
-        ]
-    ]
-
-    return bin_edges
-
-
-def measurements_to_bins(
-    measurements_schema: pd.Series,
-    bin_edges: pd.DataFrame,
-) -> pd.Series:
-
-    output = pd.Series(dtype=pd.Int64Dtype)
-    for index, measurement in measurements_schema.items():
-        if index in bin_edges.index:
-            bin = return_wagner_decile(bin_edges.loc[index], measurement)
-            output.loc[index] = bin
-
-    return output
 
 
 def return_wagner_decile(bin_edges: list, value: float) -> int:
@@ -242,16 +173,6 @@ def parse_contents(contents, filename) -> dict:
         return False, "Keine Messungen gefunden"
 
     return True, {"info": info.to_dict(), "data": data.to_dict(), "filename": filename}
-
-
-def parse_and_validate_uploads(
-    upload_contents: list
-):
-    uploaded_files = [
-        parse_contents(c) for c in upload_contents
-    ]
-
-    return uploaded_files
 
 #######################
 # Plots ########*
@@ -391,7 +312,7 @@ def wrap_figure_in_graph(title: str, figure):
             )
         ],
         style={
-            # "padding-left": "20px",
+            "page-break-before": "initial",
         }
     )
 
@@ -443,42 +364,6 @@ external_stylesheets = [dmc.theme.DEFAULT_COLORS]
 app = Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
-###################
-# Data Processing #
-###################
-
-# attributes = load_attributes()
-# background = load_background()
-# section_config = load_plot_section_config()
-
-# input_df = pd.read_excel(get_absolute_path(
-#     "tests/data/input_successful.xlsx"))
-
-# validation_result, alert = validate_upload(input_df)
-# metadata, data_df = split_metadata_data(input_df)
-
-# bin_edges = get_bin_edges(
-#     "gemischt", "m", "right", background)
-# binned_measurements = measurements_to_bins(data_df, bin_edges)
-
-####################################
-### Create Dynamic Plot Elements ###
-####################################
-
-# # Subject Grid
-# subject_grid = frontend.return_subject_grid(metadata, "switch-subject")
-subject_grid = []
-
-# # Measurement Plots
-# plot_sections = frontend.get_plot_sections(
-#     binned_measurements, attributes, section_config)
-plot_sections = []
-
-#######################
-####### Layout ########
-#######################
-
-
 # App layout
 app.layout = dmc.Container(
     [
@@ -495,8 +380,7 @@ app.layout = dmc.Container(
         dmc.Container(
             style=container_style,
             children=[
-                dmc.SimpleGrid(
-                    cols=3,
+                dmc.Group(
                     children=[
                         dcc.Upload(
                             id="upload-data",
@@ -509,23 +393,15 @@ app.layout = dmc.Container(
                                            id="btn_image"),
                                 dcc.Download(id="download-xlsx"),
                             ]
-                        ),
-                        dmc.Button("Druckansicht",
-                                   id="btn_printview")
-                    ])
-            ]
-        ),
-        dmc.Container(
-            style=container_style,
-            children=[
-                dmc.Title(dmc.Text("Dateien"), order=2),
+                        )
+                    ]),
                 dmc.Container(id="upload-debug-container"),
                 dmc.Container(id="upload-error-messages"),
             ]),
         dmc.Container(
             style=container_style,
             children=[
-                dmc.Title("Vergleichsgruppe (Hintergrund)", order=2),
+                dmc.Title("Hintergrund", order=2),
                 dmc.Text(
                     "Es werde nur Metriken angezeigt, für welche Hintergrundsdaten verfügbar sind.",
                 ),
@@ -552,14 +428,13 @@ app.layout = dmc.Container(
                         )
                     ]),
                 dmc.Checkbox(
-                    id="checkbox-background-hand", label="Fehlender Hintergrund bei einer Hand durch andere Hand ersetzen.",
+                    id="checkbox-background-hand", label="Fehlenden Hintergrund bei einer Hand durch andere Hand ersetzen.",
                     checked=True,
                     mt=10
                 ),
             ]
         ),
-        dmc.Container(id="all-plots", style=container_style,
-                      children=plot_sections)
+        dmc.Container(id="all-plots", style=container_style)
     ],
     fluid=True,
 )
@@ -945,6 +820,7 @@ def func(n_clicks):
 #######################
 # Run the App
 if __name__ == "__main__":
-    # app.run_server(debug=False)
+    app.run_server(debug=False)
+
     # For local development
-    app.run(debug=True)
+    # app.run(debug=True)
