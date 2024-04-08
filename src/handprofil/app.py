@@ -14,8 +14,10 @@ import dash_mantine_components as dmc
 import os
 from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
+import dash_auth
 import plotly.express as px
 from datetime import datetime
+from dotenv import load_dotenv, find_dotenv
 
 
 ###################
@@ -357,12 +359,24 @@ def return_subject_grid(metadata: pd.Series, switch_id: str):
 ###################
 
 # Path
-print(os.getenv("DEBUG", "NONE"))
 print(os.getcwd())
+
+# Environment
+# load_dotenv does not overwrite existing environment variables
+load_dotenv()
 
 # Initialize the app - incorporate a Dash Mantine theme
 external_stylesheets = [dmc.theme.DEFAULT_COLORS]
 app = Dash(__name__, external_stylesheets=external_stylesheets)
+print(f"Environment: {os.getenv('ENVIRONMENT')}")
+
+if os.getenv('ENVIRONMENT') == 'PRODUCTION':
+    auth = dash_auth.BasicAuth(
+        app,
+        {os.getenv('USERNAME'):os.getenv('PASSWORD')}
+    )
+
+# This is used by the production server
 server = app.server
 
 # App layout
@@ -404,7 +418,7 @@ app.layout = dmc.Container(
             children=[
                 dmc.Title("Hintergrund", order=2),
                 dmc.Text(
-                    "Es werde nur Metriken angezeigt, für welche Hintergrundsdaten verfügbar sind.",
+                    "Es werde nur Metriken angezeigt, für welche Hintergrunddaten verfügbar sind.",
                 ),
                 dmc.SimpleGrid(
                     cols=3,
@@ -821,7 +835,4 @@ def func(n_clicks):
 #######################
 # Run the App
 if __name__ == "__main__":
-    app.run_server(debug=False)
-
-    # For local development
-    # app.run(debug=True)
+    app.run(debug=True)
