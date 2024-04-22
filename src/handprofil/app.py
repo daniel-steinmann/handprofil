@@ -139,15 +139,18 @@ def return_wagner_decile(bin_edges: list, value: float) -> int:
 def parse_contents(contents, filename) -> dict:
     content_type, content_string = contents.split(",")
 
+    if content_type != 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64':
+        return False, "Ungültiges Dateiformat. Unterstützt werden Dateien im .xslx Format"
+
     decoded = base64.b64decode(content_string)
     try:
         info = pd.read_excel(
             io.BytesIO(decoded),
+            sheet_name=0,
             header=0,
-            skiprows=3,
             nrows=9,
             names=["id", "description", "value"],
-            usecols=[0, 1, 2],
+            usecols=[0, 1, 3],
             dtype={
                 "id": np.int64,
                 "description": str,
@@ -157,9 +160,9 @@ def parse_contents(contents, filename) -> dict:
 
         data = pd.read_excel(
             io.BytesIO(decoded),
+            sheet_name=1,
             header=0,
-            skiprows=14,
-            usecols=[0, 1, 2, 5, 6],
+            usecols=[0, 1, 2, 4, 5],
             names=["id", "device", "description", "left", "right"],
             dtype={
                 "id": np.int64,
@@ -373,7 +376,7 @@ print(f"Environment: {os.getenv('ENVIRONMENT')}")
 if os.getenv('ENVIRONMENT') == 'PRODUCTION':
     auth = dash_auth.BasicAuth(
         app,
-        {os.getenv('USERNAME'):os.getenv('PASSWORD')}
+        {os.getenv('USERNAME'): os.getenv('PASSWORD')}
     )
 
 # This is used by the production server

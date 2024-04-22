@@ -9,10 +9,7 @@ from handprofil.app import (
     get_plot_input_data,
     create_plots,
     upload_files_to_store,
-    load_attributes,
-    load_background,
-    load_meta_attributes,
-    load_plot_section_config
+    parse_contents
 )
 
 
@@ -43,6 +40,21 @@ def test_load_static_data():
     result = load_static_data("dummy")
 
     # Assert
+
+
+def test_parse_contents():
+    filename = "measurement_template_filled.xlsx"
+    content_type = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64'
+    path = get_testfile_path(f"data/{filename}")
+    data = open(path, 'rb').read()
+    base64_encoded = base64.b64encode(data).decode('UTF-8')
+
+    content = content_type + ',' + base64_encoded
+
+    is_success, result = parse_contents(content, filename)
+
+    assert result['info']['value'][0] == 'TM24'
+    assert result['data']['left'][0] == 194.0
 
 
 @pytest.mark.parametrize(
@@ -198,7 +210,7 @@ def test_compute_plot_input_data(no_data):
 
     # Act
     results = get_plot_input_data(
-        decile_data_store, hands_shown_values, hands_shown_ids, static_store
+        decile_data_store, hands_shown_values, static_store
     )
 
     # Assert
@@ -382,9 +394,11 @@ def get_testfile_path(relative_path):
 def test_validate_meta_attributes(filename, expected):
     # Arrange
     path = get_testfile_path(f"data/{filename}")
+    content_type = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64'
 
     with open(path, 'rb') as data:
-        content = "xslx," + base64.b64encode(data.read()).decode('UTF-8')
+        content = content_type + ',' + \
+            base64.b64encode(data.read()).decode('UTF-8')
 
     contents = [content, content]
 
@@ -397,32 +411,3 @@ def test_validate_meta_attributes(filename, expected):
     first_content = data[0]
     info = pd.DataFrame.from_dict(first_content['info'])
     data = pd.DataFrame.from_dict(first_content['data'])
-
-
-def test_load_attributes():
-    # Arrange
-    # Act
-    df = load_attributes()
-
-
-def test_load_meta_attributes():
-    """
-    Testing Upload Function
-    """
-    # Arrange
-    # Act
-    df = load_meta_attributes()
-
-
-def test_load_background():
-    """
-    Testing Upload Function
-    """
-    # Arrange
-    # Act
-    df = load_background()
-
-
-def test_load_plot_section_config():
-
-    section = load_plot_section_config()
