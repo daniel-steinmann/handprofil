@@ -2,7 +2,7 @@ dash>=2.14.0
 numpy>=1.16.2
 pandas>=2.1.0
 plotly
-dash_mantine_components
+dash_mantine_components==0.12.1
 openpyexcel
 openpyxl
 pytest
